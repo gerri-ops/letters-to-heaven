@@ -1,0 +1,648 @@
+{
+  "version": 1,
+  "prompts": [
+    {
+      "id": "letter_001",
+      "category": "letters",
+      "text": "Write a letter telling them about a ordinary Tuesday you wish they could have shared.",
+      "intensity": "gentle",
+      "sensitivityTags": [
+        "daily-life"
+      ]
+    },
+    {
+      "id": "letter_002",
+      "category": "letters",
+      "text": "Begin with \"Dear ___\" and share one thing you never got to say out loud.",
+      "intensity": "reflective",
+      "sensitivityTags": [
+        "unsaid-words"
+      ]
+    },
+    {
+      "id": "letter_003",
+      "category": "letters",
+      "text": "Describe the last hug you remember and what you would add if you had one more minute.",
+      "intensity": "reflective",
+      "sensitivityTags": [
+        "physical-memory",
+        "loss"
+      ]
+    },
+    {
+      "id": "letter_004",
+      "category": "letters",
+      "text": "Tell them about a family event coming up and how you will include their memory.",
+      "intensity": "family",
+      "sensitivityTags": [
+        "holidays",
+        "family"
+      ]
+    },
+    {
+      "id": "letter_005",
+      "category": "letters",
+      "text": "Write about a song that reminds you of their voice or laugh.",
+      "intensity": "gentle",
+      "sensitivityTags": [
+        "music"
+      ]
+    },
+    {
+      "id": "letter_006",
+      "category": "letters",
+      "text": "Share an apology you are still carrying, without pressure to forgive yourself today.",
+      "intensity": "reflective",
+      "sensitivityTags": [
+        "guilt",
+        "self-compassion"
+      ]
+    },
+    {
+      "id": "letter_007",
+      "category": "letters",
+      "text": "List three small joys from this week you would have texted them about.",
+      "intensity": "gentle",
+      "sensitivityTags": [
+        "daily-life"
+      ]
+    },
+    {
+      "id": "memory_001",
+      "category": "memories",
+      "text": "Recall a kitchen moment—smells, sounds, and who was standing where.",
+      "intensity": "family",
+      "sensitivityTags": [
+        "food",
+        "home"
+      ]
+    },
+    {
+      "id": "memory_002",
+      "category": "memories",
+      "text": "Describe a vacation or road trip detail that still makes you smile.",
+      "intensity": "gentle",
+      "sensitivityTags": [
+        "travel"
+      ]
+    },
+    {
+      "id": "memory_003",
+      "category": "memories",
+      "text": "Write about a time they surprised you with kindness.",
+      "intensity": "reflective",
+      "sensitivityTags": [
+        "kindness"
+      ]
+    },
+    {
+      "id": "memory_004",
+      "category": "memories",
+      "text": "Capture a childhood ritual only the two of you understood.",
+      "intensity": "family",
+      "sensitivityTags": [
+        "childhood"
+      ]
+    },
+    {
+      "id": "memory_005",
+      "category": "memories",
+      "text": "Remember a hard season you got through together and what they did.",
+      "intensity": "reflective",
+      "sensitivityTags": [
+        "hardship",
+        "support"
+      ]
+    },
+    {
+      "id": "memory_006",
+      "category": "memories",
+      "text": "Note a funny mistake or inside joke that still lives in your family.",
+      "intensity": "gentle",
+      "sensitivityTags": [
+        "humor"
+      ]
+    },
+    {
+      "id": "memory_007",
+      "category": "memories",
+      "text": "Describe their hands, gestures, or the way they entered a room.",
+      "intensity": "reflective",
+      "sensitivityTags": [
+        "sensory"
+      ]
+    },
+    {
+      "id": "sign_001",
+      "category": "signs",
+      "text": "Did something remind you of them today? Describe it without needing proof.",
+      "intensity": "signs",
+      "sensitivityTags": [
+        "signs",
+        "faith-optional"
+      ]
+    },
+    {
+      "id": "sign_002",
+      "category": "signs",
+      "text": "Write about a cardinal, bird, or animal visit and what you felt in your body.",
+      "intensity": "signs",
+      "sensitivityTags": [
+        "nature",
+        "cardinal"
+      ]
+    },
+    {
+      "id": "sign_003",
+      "category": "signs",
+      "text": "Record a coincidence—a song, number, or phrase—that arrived when you needed comfort.",
+      "intensity": "signs",
+      "sensitivityTags": [
+        "coincidence"
+      ]
+    },
+    {
+      "id": "sign_004",
+      "category": "signs",
+      "text": "Describe a dream where they appeared. Hold it lightly; meaning is yours to choose.",
+      "intensity": "reflective",
+      "sensitivityTags": [
+        "dreams"
+      ]
+    },
+    {
+      "id": "sign_005",
+      "category": "signs",
+      "text": "Note an object you found that connected you to them—a photo, ticket, or keepsake.",
+      "intensity": "gentle",
+      "sensitivityTags": [
+        "objects"
+      ]
+    },
+    {
+      "id": "sign_006",
+      "category": "signs",
+      "text": "Write about light, weather, or a rainbow on a meaningful date.",
+      "intensity": "signs",
+      "sensitivityTags": [
+        "nature",
+        "anniversary"
+      ]
+    },
+    {
+      "id": "interview_001",
+      "category": "interviews",
+      "text": "If you could ask them one question about their childhood, what would it be?",
+      "intensity": "family",
+      "sensitivityTags": [
+        "legacy"
+      ]
+    },
+    {
+      "id": "interview_002",
+      "category": "interviews",
+      "text": "Write their answer to: \"What mattered most to you in the last year of your life?\"",
+      "intensity": "reflective",
+      "sensitivityTags": [
+        "legacy",
+        "end-of-life"
+      ]
+    },
+    {
+      "id": "interview_003",
+      "category": "interviews",
+      "text": "Capture advice they gave you that you still follow—or wish you had followed.",
+      "intensity": "reflective",
+      "sensitivityTags": [
+        "wisdom"
+      ]
+    },
+    {
+      "id": "interview_004",
+      "category": "interviews",
+      "text": "Interview a relative: \"What is your favorite story about them?\" Paste or summarize here.",
+      "intensity": "family",
+      "sensitivityTags": [
+        "family",
+        "oral-history"
+      ]
+    },
+    {
+      "id": "interview_005",
+      "category": "interviews",
+      "text": "Imagine their reply to: \"What should the kids never forget about me?\"",
+      "intensity": "family",
+      "sensitivityTags": [
+        "children",
+        "legacy"
+      ]
+    },
+    {
+      "id": "interview_006",
+      "category": "interviews",
+      "text": "Record a phrase they repeated often and what it meant in context.",
+      "intensity": "gentle",
+      "sensitivityTags": [
+        "language"
+      ]
+    },
+    {
+      "id": "recipe_001",
+      "category": "recipes",
+      "text": "Write down their signature dish, even if measurements are approximate.",
+      "intensity": "family",
+      "sensitivityTags": [
+        "food",
+        "legacy"
+      ]
+    },
+    {
+      "id": "recipe_002",
+      "category": "recipes",
+      "text": "Describe who taught them to cook and a mistake that became tradition.",
+      "intensity": "family",
+      "sensitivityTags": [
+        "food",
+        "story"
+      ]
+    },
+    {
+      "id": "recipe_003",
+      "category": "recipes",
+      "text": "List the holiday foods on their table and who sits where now.",
+      "intensity": "family",
+      "sensitivityTags": [
+        "holidays",
+        "food"
+      ]
+    },
+    {
+      "id": "recipe_004",
+      "category": "recipes",
+      "text": "Capture a secret ingredient or step they never wrote down.",
+      "intensity": "gentle",
+      "sensitivityTags": [
+        "food"
+      ]
+    },
+    {
+      "id": "recipe_005",
+      "category": "recipes",
+      "text": "Write instructions for making their comfort meal on a hard day.",
+      "intensity": "gentle",
+      "sensitivityTags": [
+        "self-care",
+        "food"
+      ]
+    },
+    {
+      "id": "recipe_006",
+      "category": "recipes",
+      "text": "Pair a recipe with a memory of the last time you cooked it together.",
+      "intensity": "reflective",
+      "sensitivityTags": [
+        "food",
+        "loss"
+      ]
+    },
+    {
+      "id": "tradition_001",
+      "category": "traditions",
+      "text": "Describe a holiday tradition they started or kept alive.",
+      "intensity": "family",
+      "sensitivityTags": [
+        "holidays"
+      ]
+    },
+    {
+      "id": "tradition_002",
+      "category": "traditions",
+      "text": "Write how you will adapt a tradition this year while honoring them.",
+      "intensity": "reflective",
+      "sensitivityTags": [
+        "holidays",
+        "change"
+      ]
+    },
+    {
+      "id": "tradition_003",
+      "category": "traditions",
+      "text": "Note a birthday ritual—cake, song, or visit—and who carries it forward.",
+      "intensity": "family",
+      "sensitivityTags": [
+        "birthday"
+      ]
+    },
+    {
+      "id": "tradition_004",
+      "category": "traditions",
+      "text": "Record a faith or cultural practice that connected you across generations.",
+      "intensity": "reflective",
+      "sensitivityTags": [
+        "faith",
+        "culture"
+      ]
+    },
+    {
+      "id": "tradition_005",
+      "category": "traditions",
+      "text": "Describe an annual trip or outing you will continue in their name.",
+      "intensity": "gentle",
+      "sensitivityTags": [
+        "travel"
+      ]
+    },
+    {
+      "id": "tradition_006",
+      "category": "traditions",
+      "text": "Write a new micro-tradition—a candle, toast, or walk—you are trying.",
+      "intensity": "gentle",
+      "sensitivityTags": [
+        "new-ritual"
+      ]
+    },
+    {
+      "id": "milestone_001",
+      "category": "milestones",
+      "text": "A graduation, wedding, or birth happened without them. Name what you felt.",
+      "intensity": "milestone",
+      "sensitivityTags": [
+        "milestone",
+        "mixed-emotions"
+      ]
+    },
+    {
+      "id": "milestone_002",
+      "category": "milestones",
+      "text": "Write about their birthday today—what you did and what you avoided.",
+      "intensity": "milestone",
+      "sensitivityTags": [
+        "birthday"
+      ]
+    },
+    {
+      "id": "milestone_003",
+      "category": "milestones",
+      "text": "Note the anniversary of their passing and one gentle act of remembrance.",
+      "intensity": "milestone",
+      "sensitivityTags": [
+        "anniversary",
+        "loss"
+      ]
+    },
+    {
+      "id": "milestone_004",
+      "category": "milestones",
+      "text": "Describe a first without them—the first holiday, first spring, first laugh.",
+      "intensity": "milestone",
+      "sensitivityTags": [
+        "firsts"
+      ]
+    },
+    {
+      "id": "milestone_005",
+      "category": "milestones",
+      "text": "Record a goal they would have cheered for and how you marked it.",
+      "intensity": "reflective",
+      "sensitivityTags": [
+        "achievement"
+      ]
+    },
+    {
+      "id": "milestone_006",
+      "category": "milestones",
+      "text": "Write about moving homes, jobs, or cities and what you brought of them.",
+      "intensity": "reflective",
+      "sensitivityTags": [
+        "change"
+      ]
+    },
+    {
+      "id": "healing_001",
+      "category": "healing",
+      "text": "Name one feeling that visited you today. No fixing—just noticing.",
+      "intensity": "gentle",
+      "sensitivityTags": [
+        "emotions",
+        "self-compassion"
+      ]
+    },
+    {
+      "id": "healing_002",
+      "category": "healing",
+      "text": "Write a letter to yourself from their perspective, using only kind words.",
+      "intensity": "reflective",
+      "sensitivityTags": [
+        "self-compassion"
+      ]
+    },
+    {
+      "id": "healing_003",
+      "category": "healing",
+      "text": "Describe a place in nature where grief feels quieter for five minutes.",
+      "intensity": "gentle",
+      "sensitivityTags": [
+        "nature",
+        "grief"
+      ]
+    },
+    {
+      "id": "healing_004",
+      "category": "healing",
+      "text": "List supports that helped this month—people, therapy, faith, rest.",
+      "intensity": "gentle",
+      "sensitivityTags": [
+        "support"
+      ]
+    },
+    {
+      "id": "healing_005",
+      "category": "healing",
+      "text": "Write about anger or guilt without judging it. What does it protect?",
+      "intensity": "reflective",
+      "sensitivityTags": [
+        "anger",
+        "guilt"
+      ]
+    },
+    {
+      "id": "healing_006",
+      "category": "healing",
+      "text": "Note one boundary you set to protect your heart and why it matters.",
+      "intensity": "reflective",
+      "sensitivityTags": [
+        "boundaries"
+      ]
+    },
+    {
+      "id": "healing_007",
+      "category": "healing",
+      "text": "Describe sleep, dreams, or fatigue lately—grief in the body is real.",
+      "intensity": "gentle",
+      "sensitivityTags": [
+        "body",
+        "fatigue"
+      ]
+    },
+    {
+      "id": "gratitude_001",
+      "category": "gratitude",
+      "text": "Name three gifts they left you—traits, lessons, or objects.",
+      "intensity": "gentle",
+      "sensitivityTags": [
+        "gratitude"
+      ]
+    },
+    {
+      "id": "gratitude_002",
+      "category": "gratitude",
+      "text": "Write thank-you to someone who showed up for you after the loss.",
+      "intensity": "reflective",
+      "sensitivityTags": [
+        "community"
+      ]
+    },
+    {
+      "id": "gratitude_003",
+      "category": "gratitude",
+      "text": "List moments when joy and sorrow shared the same hour—both are allowed.",
+      "intensity": "reflective",
+      "sensitivityTags": [
+        "mixed-emotions"
+      ]
+    },
+    {
+      "id": "gratitude_004",
+      "category": "gratitude",
+      "text": "Describe a way their love still shapes how you treat others.",
+      "intensity": "family",
+      "sensitivityTags": [
+        "legacy",
+        "kindness"
+      ]
+    },
+    {
+      "id": "gratitude_005",
+      "category": "gratitude",
+      "text": "Note one small beauty you would have pointed out to them today.",
+      "intensity": "gentle",
+      "sensitivityTags": [
+        "daily-life"
+      ]
+    },
+    {
+      "id": "gratitude_006",
+      "category": "gratitude",
+      "text": "Write about continuing bonds—how connection changes but does not have to end.",
+      "intensity": "reflective",
+      "sensitivityTags": [
+        "continuing-bonds"
+      ]
+    },
+    {
+      "id": "letter_008",
+      "category": "letters",
+      "text": "Tell them about a child or grandchild and what you hope they inherit.",
+      "intensity": "family",
+      "sensitivityTags": [
+        "children",
+        "legacy"
+      ]
+    },
+    {
+      "id": "memory_008",
+      "category": "memories",
+      "text": "Write about a photograph you keep nearby and the story behind it.",
+      "intensity": "gentle",
+      "sensitivityTags": [
+        "photos"
+      ]
+    },
+    {
+      "id": "sign_007",
+      "category": "signs",
+      "text": "Record a moment of peace you attribute to their presence, however you define that.",
+      "intensity": "signs",
+      "sensitivityTags": [
+        "faith-optional",
+        "comfort"
+      ]
+    },
+    {
+      "id": "ordinary_001",
+      "category": "memories",
+      "text": "What did they always order?",
+      "intensity": "gentle",
+      "sensitivityTags": [
+        "food",
+        "daily-life"
+      ]
+    },
+    {
+      "id": "ordinary_002",
+      "category": "memories",
+      "text": "What ordinary sound reminds you of them?",
+      "intensity": "gentle",
+      "sensitivityTags": [
+        "sensory",
+        "daily-life"
+      ]
+    },
+    {
+      "id": "ordinary_003",
+      "category": "memories",
+      "text": "What phrase did they say often?",
+      "intensity": "gentle",
+      "sensitivityTags": [
+        "language",
+        "humor"
+      ]
+    },
+    {
+      "id": "ordinary_004",
+      "category": "memories",
+      "text": "What did they do when they were trying to make you laugh?",
+      "intensity": "gentle",
+      "sensitivityTags": [
+        "humor"
+      ]
+    },
+    {
+      "id": "ordinary_005",
+      "category": "memories",
+      "text": "What small habit are you afraid you might forget?",
+      "intensity": "gentle",
+      "sensitivityTags": [
+        "daily-life"
+      ]
+    },
+    {
+      "id": "letter_today_001",
+      "category": "letters",
+      "text": "What would you tell them about today?",
+      "intensity": "gentle",
+      "sensitivityTags": [
+        "daily-life"
+      ]
+    },
+    {
+      "id": "memory_presence_001",
+      "category": "memories",
+      "text": "What did they make better simply by being there?",
+      "intensity": "family",
+      "sensitivityTags": [
+        "kindness",
+        "family"
+      ]
+    },
+    {
+      "id": "photo_story_001",
+      "category": "memories",
+      "text": "Is there a photo whose full story has never been written down?",
+      "intensity": "gentle",
+      "sensitivityTags": [
+        "photos"
+      ]
+    }
+  ]
+}

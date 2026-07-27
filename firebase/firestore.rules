@@ -1,0 +1,45 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    match /users/{uid} {
+      allow read, write: if isOwner(uid);
+
+      match /memorials/{memorialId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /entries/{entryId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /media/{mediaId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /remembranceDates/{dateId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /exportJobs/{jobId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /entitlements/{entitlementId} {
+        allow read, write: if isOwner(uid);
+      }
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
