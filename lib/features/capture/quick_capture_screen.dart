@@ -62,12 +62,16 @@ class _QuickCaptureScreenState extends State<QuickCaptureScreen> {
     switch (_mode) {
       case QuickCaptureMode.type:
         _bodyFocus.requestFocus();
+        return;
       case QuickCaptureMode.speak:
         await _startSpeaking();
+        return;
       case QuickCaptureMode.photo:
         await _addPhoto();
+        return;
       case QuickCaptureMode.audio:
         await _addAudio();
+        return;
     }
   }
 
@@ -103,7 +107,12 @@ class _QuickCaptureScreenState extends State<QuickCaptureScreen> {
   Future<void> _setMode(QuickCaptureMode mode) async {
     if (_listening) {
       await _speech.stop();
-      setState(() => _listening = false);
+      if (mounted) {
+        setState(() => _listening = false);
+      }
+    }
+    if (!mounted) {
+      return;
     }
     setState(() {
       _mode = mode;
@@ -112,12 +121,16 @@ class _QuickCaptureScreenState extends State<QuickCaptureScreen> {
     switch (mode) {
       case QuickCaptureMode.type:
         _bodyFocus.requestFocus();
+        return;
       case QuickCaptureMode.speak:
         await _startSpeaking();
+        return;
       case QuickCaptureMode.photo:
         await _addPhoto();
+        return;
       case QuickCaptureMode.audio:
         await _addAudio();
+        return;
     }
   }
 
@@ -131,7 +144,11 @@ class _QuickCaptureScreenState extends State<QuickCaptureScreen> {
         trigger: PaywallTrigger.voiceRecording,
       );
       if (mounted) {
-        setState(() => _mode = QuickCaptureMode.type);
+        setState(() {
+          _mode = QuickCaptureMode.type;
+          _speechStatus = null;
+        });
+        _bodyFocus.requestFocus();
       }
       return;
     }
@@ -140,9 +157,10 @@ class _QuickCaptureScreenState extends State<QuickCaptureScreen> {
       if (mounted) {
         setState(() {
           _speechStatus =
-              'Voice dictation is not available here. Type, or use your '
-              'keyboard microphone.';
+              'Speak is Premium, and voice dictation is not available in this '
+              'browser. Type here, or use Add audio on a phone or tablet.';
           _mode = QuickCaptureMode.type;
+          _listening = false;
         });
         _bodyFocus.requestFocus();
       }
@@ -150,6 +168,7 @@ class _QuickCaptureScreenState extends State<QuickCaptureScreen> {
     }
     setState(() {
       _listening = true;
+      _mode = QuickCaptureMode.speak;
       _speechStatus = 'Listening… say what you want to keep.';
     });
     final prefix = _bodyController.text;
@@ -514,14 +533,19 @@ class _QuickCaptureScreenState extends State<QuickCaptureScreen> {
                     label: 'Quick note',
                     selected: _kind == QuickCaptureKind.note,
                     icon: Icons.edit_note,
-                    onTap: () => setState(() => _kind = QuickCaptureKind.note),
+                    onTap: () {
+                      setState(() => _kind = QuickCaptureKind.note);
+                      _bodyFocus.requestFocus();
+                    },
                   ),
                   _KindChip(
                     label: 'Cardinal visit',
                     selected: _kind == QuickCaptureKind.cardinalVisit,
                     artwork: ArtworkAssets.cardinal,
-                    onTap: () =>
-                        setState(() => _kind = QuickCaptureKind.cardinalVisit),
+                    onTap: () {
+                      setState(() => _kind = QuickCaptureKind.cardinalVisit);
+                      _bodyFocus.requestFocus();
+                    },
                   ),
                 ],
               ),
@@ -611,25 +635,46 @@ class _KindChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FilterChip(
-      selected: selected,
-      showCheckmark: false,
-      avatar: artwork != null
-          ? Padding(
-              padding: const EdgeInsets.all(2),
-              child: ArtworkImage(
-                asset: artwork!,
-                height: 18,
-                width: 18,
-                fit: BoxFit.contain,
+    return Material(
+      color: selected ? AppColors.softBlush : AppColors.parchment,
+      borderRadius: BorderRadius.circular(22),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(22),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
+              color: selected ? AppColors.cardinalRed : AppColors.softBlush,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (artwork != null)
+                ArtworkImage(
+                  asset: artwork!,
+                  height: 18,
+                  width: 18,
+                  fit: BoxFit.contain,
+                )
+              else
+                Icon(
+                  icon ?? Icons.circle_outlined,
+                  size: 18,
+                  color: AppColors.burgundy,
+                ),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: AppColors.burgundy,
+                    ),
               ),
-            )
-          : Icon(icon ?? Icons.circle_outlined, size: 18),
-      label: Text(label),
-      onSelected: (_) => onTap(),
-      selectedColor: AppColors.softBlush,
-      side: BorderSide(
-        color: selected ? AppColors.cardinalRed : AppColors.softBlush,
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -650,15 +695,34 @@ class _ModeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FilterChip(
-      selected: selected,
-      showCheckmark: false,
-      avatar: Icon(icon, size: 18),
-      label: Text(label),
-      onSelected: (_) => onTap(),
-      selectedColor: AppColors.softBlush,
-      side: BorderSide(
-        color: selected ? AppColors.cardinalRed : AppColors.softBlush,
+    return Material(
+      color: selected ? AppColors.softBlush : AppColors.parchment,
+      borderRadius: BorderRadius.circular(22),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(22),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
+              color: selected ? AppColors.cardinalRed : AppColors.softBlush,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 18, color: AppColors.burgundy),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: AppColors.burgundy,
+                    ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
