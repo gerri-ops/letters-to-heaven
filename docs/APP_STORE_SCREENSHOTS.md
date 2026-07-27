@@ -20,7 +20,7 @@ Use **real interface screens** only. Do not place pages inside decorative phone 
 | 3 | Capture a sentence, photo, voice, dream, or sign. | **Quick capture** with mode chips / attach options visible | `/capture` |
 | 4 | No streaks. No pressure. Nothing to finish. | Calm **Home** — greeting, four save actions, quiet Recent (no badges, no countdowns) | `/shell/home` |
 | 5 | Preserve the voices and stories your family should never lose. | **Voice Keepsakes** hub or editor **and** an **interview**-style memory (Someone else’s story) | `/voice-keepsakes` + memory with interview template |
-| 6 | Turn scattered memories into a beautiful keepsake. | Polished **PDF / Keepsake preview** (Cardinal Garden or Soft Neutral) | `/keepsake-preview` or export preview |
+| 6 | Turn scattered memories into a beautiful keepsake. | Polished **PDF / Keepsake preview** (Journal PDF, Simple, or Ink Saver) | `/keepsake-preview` or export preview |
 | 7 | Private by default. Yours even if you cancel. | **Biometric lock**, encrypted **backup**, **export**, and **delete** controls | Settings + Data rights (may be one composed scroll or two adjacent system screens—still real UI, not a marketing collage) |
 
 ## Caption text (copy-paste)

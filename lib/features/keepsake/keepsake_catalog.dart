@@ -126,66 +126,86 @@ extension KeepsakeBookTypeX on KeepsakeBookType {
   }
 }
 
-/// Giftable export styles for the Premium Keepsake Builder.
+/// Giftable export styles — the three keepsake creations that make the product unique.
 enum ExportTheme {
-  /// Cream pages, cardinal accents, garden artwork — giftable keepsake print.
-  cardinalGarden,
+  /// Full memorial journal PDF with cream pages and garden accents.
+  journalPdf,
 
-  /// Soft neutrals, calm type — elegant and quiet.
-  softNeutral,
+  /// Clean, quiet layout — elegant and simple to print.
+  simple,
 
-  /// Greyscale, no fills — lighter home printing.
-  inkSavingSimple,
+  /// Greyscale, no heavy fills — lighter home printing.
+  inkSaver,
 }
 
 extension ExportThemeX on ExportTheme {
   String get label {
     switch (this) {
-      case ExportTheme.cardinalGarden:
-        return 'Cardinal Garden';
-      case ExportTheme.softNeutral:
-        return 'Soft Neutral';
-      case ExportTheme.inkSavingSimple:
-        return 'Ink-Saving Simple';
+      case ExportTheme.journalPdf:
+        return 'Journal PDF';
+      case ExportTheme.simple:
+        return 'Simple';
+      case ExportTheme.inkSaver:
+        return 'Ink Saver';
+    }
+  }
+
+  String get shortLabel {
+    switch (this) {
+      case ExportTheme.journalPdf:
+        return 'Journal';
+      case ExportTheme.simple:
+        return 'Simple';
+      case ExportTheme.inkSaver:
+        return 'Ink Saver';
     }
   }
 
   String get blurb {
     switch (this) {
-      case ExportTheme.cardinalGarden:
-        return 'Cream pages, cardinal red, and garden accents—made to feel giftable.';
-      case ExportTheme.softNeutral:
-        return 'Quiet neutrals and clean type—elegant on screen and in print.';
-      case ExportTheme.inkSavingSimple:
+      case ExportTheme.journalPdf:
+        return 'A finished memorial journal—cream pages, garden accents, ready to print or gift.';
+      case ExportTheme.simple:
+        return 'Quiet type and clean pages—elegant on screen and easy to print.';
+      case ExportTheme.inkSaver:
         return 'Greyscale only, no heavy fills—lighter printing at home.';
     }
   }
 
-  /// Legacy aliases used in older call sites / docs.
+  /// Legacy aliases used in older call sites / docs / query params.
   static ExportTheme fromLegacyName(String? name) {
     switch (name) {
       case 'journal':
-        return ExportTheme.cardinalGarden;
+      case 'journalPdf':
+      case 'cardinalGarden':
+      case 'Garden':
+        return ExportTheme.journalPdf;
       case 'simple':
-        return ExportTheme.softNeutral;
+      case 'softNeutral':
+      case 'Neutral':
+        return ExportTheme.simple;
       case 'inkSaving':
-        return ExportTheme.inkSavingSimple;
+      case 'inkSaver':
+      case 'inkSavingSimple':
+        return ExportTheme.inkSaver;
       default:
         for (final t in ExportTheme.values) {
           if (t.name == name) return t;
         }
-        return ExportTheme.cardinalGarden;
+        return ExportTheme.journalPdf;
     }
   }
 }
 
 /// Conversion copy for the premium keepsake preview.
 abstract final class KeepsakePreviewCopy {
-  static const headline = 'You have already begun a keepsake.';
+  static const headline = 'Turn what you saved into a keepsake you can hold.';
   static const supporting =
-      'Your words, photos, and voices can become a private book whenever you choose—'
-      'the clearest reason Premium exists.';
+      'Three printable exports—Journal PDF, Simple, and Ink Saver—make Letters '
+      'to Heaven more than a private journal. Your words become a finished book.';
   static const moatLine =
-      'Letters to Heaven is a private rescue net for memories, and a path to a '
-      'finished keepsake—not a grief program or a digital reprint of a thick journal.';
+      'Keepsake creation is what makes this app unique: a private rescue net for '
+      'memories, and a path to a finished print—not a grief program or a digital '
+      'reprint of a thick journal.';
+  static const stylesLine = 'Journal PDF · Simple · Ink Saver';
 }

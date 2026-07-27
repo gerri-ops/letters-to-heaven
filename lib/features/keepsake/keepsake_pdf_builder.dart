@@ -124,7 +124,7 @@ class KeepsakePdfBuilder {
               bold: bodyBold,
               italic: titleItalic,
             ),
-            buildBackground: theme == ExportTheme.cardinalGarden
+            buildBackground: theme == ExportTheme.journalPdf
                 ? (context) => pw.FullPage(
                       ignoreMargins: true,
                       child: pw.Container(color: palette.pageBg),
@@ -219,7 +219,7 @@ class KeepsakePdfBuilder {
 
   Future<_Art?> _loadArt(ExportTheme theme) async {
     // Ink-saving stays plain; other styles use dogwood on the cover.
-    if (theme == ExportTheme.inkSavingSimple) {
+    if (theme == ExportTheme.inkSaver) {
       return null;
     }
     try {
@@ -343,7 +343,7 @@ class _Palette {
 
   static _Palette forTheme(ExportTheme theme) {
     switch (theme) {
-      case ExportTheme.cardinalGarden:
+      case ExportTheme.journalPdf:
         return const _Palette(
           pageBg: PdfColor.fromInt(0xFFF7F1E8),
           brand: PdfColor.fromInt(0xFF6E1423),
@@ -356,7 +356,7 @@ class _Palette {
           chipBg: PdfColor.fromInt(0xFFEDE4D4),
           chipText: PdfColor.fromInt(0xFF6E1423),
         );
-      case ExportTheme.softNeutral:
+      case ExportTheme.simple:
         return const _Palette(
           pageBg: PdfColor.fromInt(0xFFF9F7F4),
           brand: PdfColor.fromInt(0xFF2C2419),
@@ -369,7 +369,7 @@ class _Palette {
           chipBg: PdfColor.fromInt(0xFFF0EBE3),
           chipText: PdfColor.fromInt(0xFF5C5348),
         );
-      case ExportTheme.inkSavingSimple:
+      case ExportTheme.inkSaver:
         return const _Palette(
           pageBg: PdfColors.white,
           brand: PdfColors.black,
@@ -415,7 +415,7 @@ class _CoverPage extends pw.StatelessWidget {
   pw.Widget build(pw.Context context) {
     final lifeSpan = _lifeSpan(memorial);
     final relationship = memorial.relationship?.trim();
-    final ornate = theme == ExportTheme.cardinalGarden;
+    final ornate = theme == ExportTheme.journalPdf;
     final format = context.page.pageFormat;
     final frameInset = ornate ? 36.0 : 44.0;
     final innerPad = ornate ? 40.0 : 36.0;
@@ -521,10 +521,10 @@ class _CoverPage extends pw.StatelessWidget {
           pw.SizedBox(height: ornate ? 36 : 28),
           pw.Image(
             art!.dogwood,
-            height: theme == ExportTheme.cardinalGarden ? 110 : 96,
+            height: theme == ExportTheme.journalPdf ? 110 : 96,
             fit: pw.BoxFit.contain,
           ),
-        ] else if (theme != ExportTheme.inkSavingSimple) ...[
+        ] else if (theme != ExportTheme.inkSaver) ...[
           pw.SizedBox(height: 24),
           pw.Container(width: 40, height: 1, color: palette.rule),
         ],
@@ -616,8 +616,8 @@ class _EntryBlock extends pw.StatelessWidget {
     final typeLabel = isVoiceKeepsake(entry)
         ? 'VOICE KEEPSAKE'
         : entryTypeLabel(entry.type).toUpperCase();
-    final framed = theme == ExportTheme.cardinalGarden;
-    final compact = theme == ExportTheme.inkSavingSimple;
+    final framed = theme == ExportTheme.journalPdf;
+    final compact = theme == ExportTheme.inkSaver;
     final speaker = voiceSpeaker(entry)?.trim();
     final period = voiceTimePeriod(entry)?.trim();
     final transcript = voiceTranscript(entry)?.trim();
@@ -690,7 +690,7 @@ class _EntryBlock extends pw.StatelessWidget {
             color: palette.brand,
           ),
         ),
-        if (theme == ExportTheme.cardinalGarden) ...[
+        if (theme == ExportTheme.journalPdf) ...[
           pw.SizedBox(height: 6),
           pw.Container(
             width: 36,

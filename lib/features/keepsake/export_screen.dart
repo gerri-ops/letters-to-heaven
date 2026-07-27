@@ -15,7 +15,9 @@ import 'keepsake_pdf_builder.dart';
 
 /// Premium Keepsake Builder — select entries and produce a giftable book.
 class ExportScreen extends StatefulWidget {
-  const ExportScreen({super.key});
+  const ExportScreen({super.key, this.initialTheme});
+
+  final ExportTheme? initialTheme;
 
   @override
   State<ExportScreen> createState() => _ExportScreenState();
@@ -25,7 +27,8 @@ class _ExportScreenState extends State<ExportScreen> {
   List<Entry> _all = [];
   List<Entry> _entries = [];
   final Set<String> _selected = {};
-  ExportTheme _theme = ExportTheme.cardinalGarden;
+  late ExportTheme _theme =
+      widget.initialTheme ?? ExportTheme.journalPdf;
   KeepsakeBookType _bookType = KeepsakeBookType.lettersToHeaven;
   bool _loading = true;
   bool _exporting = false;
@@ -40,7 +43,8 @@ class _ExportScreenState extends State<ExportScreen> {
     final app = AppScope.of(context);
     if (!app.premium) {
       if (mounted) {
-        context.go('/keepsake-preview');
+        final theme = _theme.name;
+        context.go('/keepsake-preview?theme=$theme');
       }
       return;
     }
@@ -155,11 +159,13 @@ class _ExportScreenState extends State<ExportScreen> {
     return Scaffold(
       appBar: LettersAppBar(
         title: const Text('Keepsake Builder'),
-        intro: 'Choose a book, a style, and the memories to include.',
+        intro:
+            'Pick Journal PDF, Simple, or Ink Saver—then choose what to include.',
         actions: [
           IconButton(
             tooltip: 'Preview',
-            onPressed: () => context.push('/keepsake-preview'),
+            onPressed: () =>
+                context.push('/keepsake-preview?theme=${_theme.name}'),
             icon: const Icon(Icons.visibility_outlined),
           ),
         ],
@@ -170,9 +176,40 @@ class _ExportScreenState extends State<ExportScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
                   child: Text(
-                    'Book type',
+                    'Export style',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  child: SegmentedButton<ExportTheme>(
+                    segments: [
+                      for (final style in ExportTheme.values)
+                        ButtonSegment(
+                          value: style,
+                          label: Text(style.shortLabel),
+                          tooltip: style.label,
+                        ),
+                    ],
+                    selected: {_theme},
+                    onSelectionChanged: (s) => setState(() => _theme = s.first),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  child: Text(
+                    _theme.blurb,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.mutedOlive,
+                        ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+                  child: Text(
+                    'Focus (optional)',
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ),
@@ -203,43 +240,6 @@ class _ExportScreenState extends State<ExportScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                   child: Text(
                     _bookType.blurb,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.mutedOlive,
-                        ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
-                  child: Text(
-                    'Export style',
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                  child: SegmentedButton<ExportTheme>(
-                    segments: const [
-                      ButtonSegment(
-                        value: ExportTheme.cardinalGarden,
-                        label: Text('Garden'),
-                      ),
-                      ButtonSegment(
-                        value: ExportTheme.softNeutral,
-                        label: Text('Neutral'),
-                      ),
-                      ButtonSegment(
-                        value: ExportTheme.inkSavingSimple,
-                        label: Text('Ink-save'),
-                      ),
-                    ],
-                    selected: {_theme},
-                    onSelectionChanged: (s) => setState(() => _theme = s.first),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                  child: Text(
-                    _theme.blurb,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AppColors.mutedOlive,
                         ),
@@ -321,7 +321,7 @@ class _ExportScreenState extends State<ExportScreen> {
                               width: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Create printable keepsake'),
+                          : Text('Create ${_theme.label}'),
                     ),
                   ),
                 ),

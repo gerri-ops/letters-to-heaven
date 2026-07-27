@@ -17,7 +17,9 @@ import 'keepsake_pdf_builder.dart';
 
 /// Conversion surface: show what saved memories become as a giftable book.
 class KeepsakePreviewScreen extends StatefulWidget {
-  const KeepsakePreviewScreen({super.key});
+  const KeepsakePreviewScreen({super.key, this.initialTheme});
+
+  final ExportTheme? initialTheme;
 
   @override
   State<KeepsakePreviewScreen> createState() => _KeepsakePreviewScreenState();
@@ -28,7 +30,8 @@ class _KeepsakePreviewScreenState extends State<KeepsakePreviewScreen> {
   Memorial? _memorial;
   bool _loading = true;
   KeepsakeBookType _bookType = KeepsakeBookType.lettersToHeaven;
-  ExportTheme _theme = ExportTheme.cardinalGarden;
+  late ExportTheme _theme =
+      widget.initialTheme ?? ExportTheme.journalPdf;
   Map<String, List<MediaAttachment>> _mediaByEntry = {};
 
   @override
@@ -172,7 +175,8 @@ class _KeepsakePreviewScreenState extends State<KeepsakePreviewScreen> {
                       for (final style in ExportTheme.values)
                         ButtonSegment(
                           value: style,
-                          label: Text(style.label.split(' ').first),
+                          label: Text(style.shortLabel),
+                          tooltip: style.label,
                         ),
                     ],
                     selected: {_theme},

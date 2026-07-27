@@ -45,7 +45,7 @@ abstract final class PlanEntitlements {
     'Multiple memorials — a separate private place for each person or pet',
     'One-year Premium gift (non-renewing) for friends and family',
     'Complete PDF Keepsake Builder (giftable books, not a data dump)',
-    'Premium cover and interior themes (Cardinal Garden, Soft Neutral, Ink-Saving)',
+    'Three keepsake exports: Journal PDF, Simple, and Ink Saver',
     'Private remembrance-date controls',
     'Family contributions when released',
     'Priority support',

@@ -9,6 +9,7 @@ import '../../features/entries/entry_editor_screen.dart';
 import '../../features/gifts/gift_premium_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/keepsake/export_screen.dart';
+import '../../features/keepsake/keepsake_catalog.dart';
 import '../../features/keepsake/keepsake_preview_screen.dart';
 import '../../features/keepsake/keepsake_screen.dart';
 import '../../features/keepsake/search_screen.dart';
@@ -275,12 +276,20 @@ GoRouter createAppRouter(AppState appState) {
       GoRoute(
         path: '/keepsake-preview',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const KeepsakePreviewScreen(),
+        builder: (context, state) => KeepsakePreviewScreen(
+          initialTheme: ExportThemeX.fromLegacyName(
+            state.uri.queryParameters['theme'],
+          ),
+        ),
       ),
       GoRoute(
         path: '/export',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const ExportScreen(),
+        builder: (context, state) => ExportScreen(
+          initialTheme: ExportThemeX.fromLegacyName(
+            state.uri.queryParameters['theme'],
+          ),
+        ),
       ),
       GoRoute(
         path: '/search',
