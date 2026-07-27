@@ -34,34 +34,34 @@ class WelcomeScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 8),
-                  Center(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(22),
-                      child: const ArtworkImage(
-                        asset: ArtworkAssets.appIcon,
-                        height: 72,
-                        width: 72,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+                  const Center(
+                    child: CardinalAccent(size: 88),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
+                  const ArtworkImage(
+                    asset: ArtworkAssets.dogwood,
+                    height: 132,
+                    width: double.infinity,
+                    fit: BoxFit.contain,
+                  ),
+                  const SizedBox(height: 20),
                   Text(
                     'Letters to Heaven',
                     textAlign: TextAlign.center,
-                    style: theme.textTheme.titleMedium?.copyWith(
+                    style: theme.textTheme.headlineMedium?.copyWith(
                       color: AppColors.burgundy,
+                      height: 1.15,
                     ),
                   ),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 16),
                   Text(
                     'Save the little things before time carries them away.',
                     textAlign: TextAlign.center,
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      height: 1.25,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      height: 1.3,
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
                   Text(
                     'The private place that catches a memory before it disappears.',
                     textAlign: TextAlign.center,
