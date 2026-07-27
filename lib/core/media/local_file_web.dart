@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
 Future<bool> fileExists(String path) async =>
     path.startsWith('blob:') ||
+    path.startsWith('data:') ||
     path.startsWith('http://') ||
     path.startsWith('https://');
 
@@ -12,6 +14,13 @@ Future<void> ensureDirectory(String path) async {}
 Future<void> copyFile(String source, String dest) async {}
 
 Future<Uint8List> readBytes(String path) async {
+  if (path.startsWith('data:')) {
+    final comma = path.indexOf(',');
+    if (comma < 0) {
+      throw StateError('Invalid data URL');
+    }
+    return Uint8List.fromList(base64Decode(path.substring(comma + 1)));
+  }
   final response = await http.get(Uri.parse(path));
   if (response.statusCode >= 400) {
     throw StateError('Could not read media at $path');

@@ -46,7 +46,11 @@ class KeepsakePdfBuilder {
     final palette = _Palette.forTheme(theme);
     final art = await _loadArt(theme);
 
-    var sorted = List<Entry>.from(entries)
+    var sorted = List<Entry>.from(
+      entries.isEmpty && previewOnly
+          ? KeepsakePreviewSamples.templateEntries(memorial)
+          : entries,
+    )
       ..sort((a, b) {
         final ad = a.entryDate ?? a.createdAt ?? DateTime(1970);
         final bd = b.entryDate ?? b.createdAt ?? DateTime(1970);

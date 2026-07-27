@@ -34,6 +34,9 @@ class SyncService {
     if (!_canSyncServer) {
       return;
     }
+    if (!(await _repository.isPremium())) {
+      return;
+    }
     final uid = AuthService.instance.firebaseUid!;
     try {
       await _firestore.upsertUserProfile(
@@ -61,6 +64,9 @@ class SyncService {
       return;
     }
     if (!_canSyncServer) {
+      return;
+    }
+    if (!(await _repository.isPremium())) {
       return;
     }
 

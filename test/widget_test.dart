@@ -18,7 +18,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('Letters to Heaven'), findsOneWidget);
-    expect(find.text('Some things still need somewhere to go.'), findsOneWidget);
+    expect(find.text('Save the little things before time carries them away.'), findsOneWidget);
     expect(find.text('Begin Gently'), findsOneWidget);
   });
 }

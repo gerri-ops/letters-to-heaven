@@ -69,8 +69,15 @@ class CloudMediaUploader {
   }
 
   String _safeFileName(String name) {
-    final cleaned = name.replaceAll(RegExp(r'[^\w.\-]+'), '_');
-    return cleaned.isEmpty ? 'photo.jpg' : cleaned;
+    var cleaned = name.replaceAll(RegExp(r'[^\w.\-]+'), '_');
+    if (cleaned.isEmpty) {
+      cleaned = 'photo';
+    }
+    if (!cleaned.toLowerCase().endsWith('.webp')) {
+      cleaned = cleaned.replaceAll(RegExp(r'\.[^.]+$'), '');
+      cleaned = '$cleaned.webp';
+    }
+    return cleaned;
   }
 
   String _guessMime(String name) {

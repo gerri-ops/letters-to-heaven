@@ -6,6 +6,7 @@ import '../../core/billing/gift_premium_plan.dart';
 import '../../core/billing/plan_entitlements.dart';
 import '../../core/billing/premium_pricing.dart';
 import '../../core/media/media_policy.dart';
+import '../../core/media/media_upload_limits.dart';
 
 class EntryLimitExceeded implements Exception {
   EntryLimitExceeded(this.limit);
@@ -14,7 +15,7 @@ class EntryLimitExceeded implements Exception {
 
   @override
   String toString() =>
-      'This action is limited on Basic. Premium unlocks more capacity.';
+      'Basic includes up to $limit saved entries. Premium has no limit.';
 }
 
 class MemorialLimitExceeded implements Exception {
@@ -62,8 +63,8 @@ class AppRepository {
   AppRepository({AppDatabase? database})
       : _database = database ?? AppDatabase();
 
-  /// Prefer [PlanEntitlements]; kept for older call sites / tests.
-  static const int freeTierEntryLimit = -1; // unlimited text on Basic
+  /// Basic saved-entry cap; Premium is unlimited.
+  static const int freeTierEntryLimit = PlanEntitlements.basicEntryLimit;
 
   /// Prefer [PremiumPricing.annualPriceUsd]; kept for older call sites.
   static const double annualPremiumPriceUsd = PremiumPricing.annualPriceUsd;
@@ -258,10 +259,20 @@ class AppRepository {
     MediaAttachment media, {
     bool forceState = false,
   }) async {
+    final premium = await isPremium();
     final MediaAttachment toSave;
     if (forceState) {
       toSave = media;
-    } else if (MediaPolicy.instance.cloudStorageEnabled) {
+    } else if (premium &&
+        MediaPolicy.instance.cloudStorageEnabled &&
+        media.mimeType != null &&
+        media.mimeType!.startsWith('image/')) {
+      toSave = media.copyWith(
+        syncState: SyncState.pendingUpload,
+        mimeType: MediaUploadLimits.webpMimeType,
+        fileName: _webpFileName(media.fileName),
+      );
+    } else if (premium && MediaPolicy.instance.cloudStorageEnabled) {
       toSave = media.copyWith(syncState: SyncState.pendingUpload);
     } else {
       toSave = media.copyWith(
@@ -271,6 +282,14 @@ class AppRepository {
     }
     await _database.upsertMedia(toSave);
     return toSave;
+  }
+
+  String _webpFileName(String? name) {
+    if (name == null || name.isEmpty) {
+      return 'photo.webp';
+    }
+    final base = name.replaceAll(RegExp(r'\.[^.]+$'), '');
+    return '$base.webp';
   }
 
   Future<List<MediaAttachment>> listMediaForEntry(String entryId) =>
@@ -305,20 +324,40 @@ class AppRepository {
       _database.listMemorials(ownerUid: ownerUid);
 
   Future<Entry> upsertEntry(Entry entry, {bool forceState = false}) async {
-    // Basic includes unlimited text letters and memories — never hard-paywall writing.
+    if (!forceState) {
+      await _enforceBasicEntryLimit(entry);
+    }
     final now = DateTime.now();
+    final premium = forceState ? true : await isPremium();
     final toSave = forceState
         ? entry
         : entry.copyWith(
             updatedAt: now,
             createdAt: entry.createdAt ?? now,
-            syncState: SyncState.pendingUpload,
+            syncState: premium ? SyncState.pendingUpload : SyncState.localOnly,
           );
     await _database.upsertEntry(toSave);
-    if (!forceState) {
+    if (!forceState && premium) {
       _enqueueSync(toSave);
     }
     return toSave;
+  }
+
+  Future<void> _enforceBasicEntryLimit(Entry entry) async {
+    if (await isPremium()) {
+      return;
+    }
+    if (entry.status != EntryStatus.saved) {
+      return;
+    }
+    final existing = await _database.getEntryById(entry.id);
+    if (existing != null && existing.status == EntryStatus.saved) {
+      return;
+    }
+    final count = await _database.countSavedEntries(memorialId: entry.memorialId);
+    if (count >= PlanEntitlements.basicEntryLimit) {
+      throw EntryLimitExceeded(PlanEntitlements.basicEntryLimit);
+    }
   }
 
   Future<List<Entry>> listEntries({

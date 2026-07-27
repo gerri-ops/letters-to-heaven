@@ -11,6 +11,8 @@ abstract final class PlanEntitlements {
 
   static const int basicMemorialLimit = 1;
   static const int basicPhotosPerEntry = 1;
+  static const int premiumPhotosPerEntry = 3;
+  static const int basicEntryLimit = 8;
   static const int basicGentlePromptLimit = 10;
 
   /// Features that must never be locked behind Premium.
@@ -22,8 +24,8 @@ abstract final class PlanEntitlements {
 
   static const basicFeatures = <String>[
     'One memorial',
-    'Unlimited text letters and memories',
-    'One photo per entry',
+    'Unlimited text letters and memories (up to $basicEntryLimit saved entries)',
+    'One photo per entry (stored as WebP)',
     'Ten gentle prompts',
     'Search and favorites',
     'Local device storage',
@@ -35,9 +37,9 @@ abstract final class PlanEntitlements {
   ];
 
   static const premiumFeatures = <String>[
-    'Secure encrypted cloud backup',
+    'Encrypted cloud backup for entries and WebP photos',
     'Cross-device syncing',
-    'Unlimited photos',
+    'Unlimited saved entries',
     'Voice recordings, speak-to-text, and audio uploads',
     'Voice transcription (private; never clones a loved one’s voice)',
     'Video keepsakes',
@@ -61,7 +63,7 @@ abstract final class PlanEntitlements {
       'damage trust; a free plan with nothing useful to do would feel predatory.';
 
   static int maxPhotosPerEntry({required bool premium}) =>
-      premium ? 9999 : basicPhotosPerEntry;
+      premium ? premiumPhotosPerEntry : basicPhotosPerEntry;
 
   static int maxMemorials({required bool premium}) =>
       premium ? 9999 : basicMemorialLimit;

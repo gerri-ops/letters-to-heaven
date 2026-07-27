@@ -12,6 +12,7 @@ import '../../core/state/app_scope.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/letters_app_bar.dart';
 import '../../data/models/models.dart';
+import 'keepsake_book_type_picker.dart';
 import 'keepsake_catalog.dart';
 import 'keepsake_pdf_builder.dart';
 
@@ -29,10 +30,11 @@ class _KeepsakePreviewScreenState extends State<KeepsakePreviewScreen> {
   List<Entry> _entries = [];
   Memorial? _memorial;
   bool _loading = true;
-  KeepsakeBookType _bookType = KeepsakeBookType.lettersToHeaven;
+  Set<KeepsakeBookType> _bookTypes = {KeepsakeBookType.lettersToHeaven};
   late ExportTheme _theme =
       widget.initialTheme ?? ExportTheme.journalPdf;
   Map<String, List<MediaAttachment>> _mediaByEntry = {};
+  bool _usingTemplatePreview = false;
 
   @override
   void initState() {
@@ -54,7 +56,7 @@ class _KeepsakePreviewScreenState extends State<KeepsakePreviewScreen> {
         final bd = b.entryDate ?? b.createdAt ?? DateTime(1970);
         return ad.compareTo(bd);
       });
-    final suggested = _bookType.suggestedEntries(visible);
+    final suggested = suggestedEntriesForBookTypes(_bookTypes, visible);
     final preview = suggested.take(3).toList();
     final mediaByEntry = <String, List<MediaAttachment>>{};
     for (final entry in preview) {
@@ -66,16 +68,9 @@ class _KeepsakePreviewScreenState extends State<KeepsakePreviewScreen> {
       _memorial = memorial;
       _entries = preview;
       _mediaByEntry = mediaByEntry;
+      _usingTemplatePreview = visible.isEmpty;
       _loading = false;
     });
-  }
-
-  Future<void> _onBookTypeChanged(KeepsakeBookType type) async {
-    setState(() {
-      _bookType = type;
-      _loading = true;
-    });
-    await _load();
   }
 
   Future<Uint8List> _buildPdf(PdfPageFormat format) async {
@@ -87,7 +82,7 @@ class _KeepsakePreviewScreenState extends State<KeepsakePreviewScreen> {
       memorial: memorial,
       entries: _entries,
       theme: _theme,
-      bookType: _bookType,
+      bookType: primaryBookType(_bookTypes),
       mediaByEntryId: _mediaByEntry,
       previewOnly: true,
     ).build();
@@ -111,7 +106,7 @@ class _KeepsakePreviewScreenState extends State<KeepsakePreviewScreen> {
       ),
     );
     if (ok || app.premium) {
-      context.push('/export');
+      context.push('/export?theme=${_theme.name}');
     }
   }
 
@@ -127,136 +122,131 @@ class _KeepsakePreviewScreenState extends State<KeepsakePreviewScreen> {
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                  child: Text(
-                    _memorial == null || _entries.isEmpty
-                        ? 'Save a memory, then return here to see it become a book.'
-                        : KeepsakePreviewCopy.headline,
-                    style: theme.textTheme.titleLarge?.copyWith(height: 1.3),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-                  child: Text(
-                    KeepsakePreviewCopy.supporting,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.mutedInk,
-                      height: 1.4,
+          : _memorial == null
+              ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(24),
+                    child: Text(
+                      'Set up a memorial first, then preview your keepsake template.',
+                      textAlign: TextAlign.center,
                     ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  height: 40,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    children: [
-                      for (final book in KeepsakeBookType.values)
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: ChoiceChip(
-                            label: Text(book.shortLabel),
-                            selected: _bookType == book,
-                            onSelected: (_) => _onBookTypeChanged(book),
-                          ),
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                      child: Text(
+                        _usingTemplatePreview
+                            ? 'Template preview'
+                            : KeepsakePreviewCopy.headline,
+                        style: theme.textTheme.titleLarge?.copyWith(height: 1.3),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                      child: Text(
+                        _usingTemplatePreview
+                            ? 'This sample shows how Journal PDF, Simple, and Ink Saver '
+                                'will look. Your saved entries will replace these pages.'
+                            : KeepsakePreviewCopy.supporting,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: AppColors.mutedInk,
+                          height: 1.4,
                         ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                  child: SegmentedButton<ExportTheme>(
-                    segments: [
-                      for (final style in ExportTheme.values)
-                        ButtonSegment(
-                          value: style,
-                          label: Text(style.shortLabel),
-                          tooltip: style.label,
-                        ),
-                    ],
-                    selected: {_theme},
-                    onSelectionChanged: (s) => setState(() => _theme = s.first),
-                  ),
-                ),
-                Expanded(
-                  child: _memorial == null || _entries.isEmpty
-                      ? Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(24),
-                            child: Text(
-                              'When you have words or photos saved, this preview '
-                              'shows how they become a printable keepsake—not a '
-                              'database export.',
-                              textAlign: TextAlign.center,
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                color: AppColors.mutedInk,
-                                height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: KeepsakeBookTypePicker(
+                        selected: _bookTypes,
+                        onChanged: (value) async {
+                          setState(() {
+                            _bookTypes = value;
+                            _loading = true;
+                          });
+                          await _load();
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                      child: SegmentedButton<ExportTheme>(
+                        segments: [
+                          for (final style in ExportTheme.values)
+                            ButtonSegment(
+                              value: style,
+                              label: Text(style.shortLabel),
+                              tooltip: style.label,
+                            ),
+                        ],
+                        selected: {_theme},
+                        onSelectionChanged: (s) =>
+                            setState(() => _theme = s.first),
+                      ),
+                    ),
+                    Expanded(
+                      child: PdfPreview(
+                        build: _buildPdf,
+                        allowPrinting: app.premium,
+                        allowSharing: app.premium,
+                        canChangePageFormat: false,
+                        canChangeOrientation: false,
+                        canDebug: false,
+                        pdfFileName: 'keepsake_preview.pdf',
+                      ),
+                    ),
+                    SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              KeepsakePreviewCopy.moatLine,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: AppColors.mutedOlive,
+                                height: 1.35,
                               ),
                             ),
-                          ),
-                        )
-                      : PdfPreview(
-                          build: _buildPdf,
-                          allowPrinting: app.premium,
-                          allowSharing: app.premium,
-                          canChangePageFormat: false,
-                          canChangeOrientation: false,
-                          canDebug: false,
-                          pdfFileName: 'keepsake_preview.pdf',
+                            const SizedBox(height: 10),
+                            if (app.premium)
+                              FilledButton(
+                                onPressed: () => context.push(
+                                  '/export?theme=${_theme.name}',
+                                ),
+                                child: const Text('Open Keepsake Builder'),
+                              )
+                            else ...[
+                              FilledButton(
+                                onPressed: _startTrial,
+                                child: const Text(
+                                  TrustPaywallCopy.startTrialLabel,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              OutlinedButton(
+                                onPressed: () => context.push(
+                                  '/paywall?trigger='
+                                  '${PaywallTrigger.keepsakePreview.queryValue}',
+                                ),
+                                child: const Text('See Premium details'),
+                              ),
+                              TextButton(
+                                onPressed: () => context.push('/data-rights'),
+                                child: const Text(
+                                  TrustPaywallCopy.continueBasicLabel,
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
-                ),
-                SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          KeepsakePreviewCopy.moatLine,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppColors.mutedOlive,
-                            height: 1.35,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        if (app.premium)
-                          FilledButton(
-                            onPressed: () => context.push('/export'),
-                            child: const Text('Open Keepsake Builder'),
-                          )
-                        else ...[
-                          FilledButton(
-                            onPressed: _startTrial,
-                            child: const Text(
-                              TrustPaywallCopy.startTrialLabel,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          OutlinedButton(
-                            onPressed: () => context.push(
-                              '/paywall?trigger='
-                              '${PaywallTrigger.keepsakePreview.queryValue}',
-                            ),
-                            child: const Text('See Premium details'),
-                          ),
-                          TextButton(
-                            onPressed: () => context.push('/data-rights'),
-                            child: const Text(
-                              TrustPaywallCopy.continueBasicLabel,
-                            ),
-                          ),
-                        ],
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
     );
   }
 }

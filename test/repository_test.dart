@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:letters_to_heaven/core/billing/plan_entitlements.dart';
 import 'package:letters_to_heaven/data/local/app_database.dart';
 import 'package:letters_to_heaven/data/models/models.dart';
 import 'package:letters_to_heaven/data/repositories/app_repository.dart';
@@ -46,7 +47,7 @@ void main() {
     expect(listed.first.body, contains('wish'));
   });
 
-  test('Basic allows many text entries without a hard paywall', () async {
+  test('Basic caps saved entries at plan limit', () async {
     await repo.setPremium(false);
     final memorial = await repo.createMemorial(
       id: 'mem-2',
@@ -54,7 +55,7 @@ void main() {
       displayName: 'Dad',
     );
 
-    for (var i = 0; i < 12; i++) {
+    for (var i = 0; i < PlanEntitlements.basicEntryLimit; i++) {
       await repo.upsertEntry(
         Entry(
           id: 'e-$i',
@@ -68,7 +69,22 @@ void main() {
       );
     }
     final listed = await repo.listEntries(memorialId: memorial.id);
-    expect(listed, hasLength(12));
+    expect(listed, hasLength(PlanEntitlements.basicEntryLimit));
+
+    expect(
+      () => repo.upsertEntry(
+        Entry(
+          id: 'e-over',
+          memorialId: memorial.id,
+          ownerUid: 'user-1',
+          type: EntryType.memory,
+          title: 'One more',
+          body: 'Nope',
+          status: EntryStatus.saved,
+        ),
+      ),
+      throwsA(isA<EntryLimitExceeded>()),
+    );
   });
 
   test('Basic limits to one memorial', () async {

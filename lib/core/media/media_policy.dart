@@ -35,7 +35,8 @@ class MediaPolicy {
   /// User-facing copy for pickers and settings.
   String get localOnlyNotice {
     if (!_cloudStorageEnabled) {
-      return 'Photos stay on this device only. Cloud photo backup is off.';
+      return 'Photos stay on this device. Encrypted cloud backup is a Premium '
+          'feature—turn it on in Settings when you subscribe.';
     }
     if (!FirebaseBootstrap.isReady) {
       return 'Cloud backup is on, but Firebase did not finish starting.';

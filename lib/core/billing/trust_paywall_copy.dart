@@ -16,7 +16,7 @@ abstract final class TrustPaywallCopy {
 
   static const benefits = <String>[
     'Private cloud backup across your devices',
-    'Unlimited photos, voice, and short video',
+    'Up to three photos per entry, plus voice and short video',
     'Printable keepsakes when you are ready',
     'A separate place for more than one loved one',
     'Search that stays private and easy to return to',

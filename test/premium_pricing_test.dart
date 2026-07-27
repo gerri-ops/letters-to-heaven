@@ -40,9 +40,9 @@ void main() {
     );
   });
 
-  test('Basic allows unlimited text entries', () async {
+  test('Basic enforces saved entry cap', () async {
     final db = AppDatabase(
-      dbName: 'basic_unlimited_${DateTime.now().microsecondsSinceEpoch}.db',
+      dbName: 'basic_entry_cap_${DateTime.now().microsecondsSinceEpoch}.db',
     );
     await db.database;
     final repo = AppRepository(database: db);
@@ -52,7 +52,7 @@ void main() {
       ownerUid: 'user-1',
       displayName: 'Mom',
     );
-    for (var i = 0; i < 15; i++) {
+    for (var i = 0; i < PlanEntitlements.basicEntryLimit; i++) {
       await repo.upsertEntry(
         Entry(
           id: 'e-$i',
@@ -66,7 +66,21 @@ void main() {
       );
     }
     final listed = await repo.listEntries(memorialId: memorial.id);
-    expect(listed, hasLength(15));
+    expect(listed, hasLength(PlanEntitlements.basicEntryLimit));
+    expect(
+      () => repo.upsertEntry(
+        Entry(
+          id: 'e-over',
+          memorialId: memorial.id,
+          ownerUid: 'user-1',
+          type: EntryType.letter,
+          title: 'Over',
+          body: 'Body',
+          status: EntryStatus.saved,
+        ),
+      ),
+      throwsA(isA<EntryLimitExceeded>()),
+    );
   });
 
   test('Basic allows one memorial only', () async {

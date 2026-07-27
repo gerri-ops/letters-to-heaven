@@ -209,3 +209,67 @@ abstract final class KeepsakePreviewCopy {
       'reprint of a thick journal.';
   static const stylesLine = 'Journal PDF · Simple · Ink Saver';
 }
+
+/// Placeholder pages for the keepsake preview when the journal is still empty.
+abstract final class KeepsakePreviewSamples {
+  static const templateEntryPrefix = 'keepsake_template_';
+
+  static bool isTemplateId(String id) => id.startsWith(templateEntryPrefix);
+
+  static List<Entry> templateEntries(Memorial memorial) {
+    final now = DateTime.now();
+    return [
+      Entry(
+        id: '${templateEntryPrefix}letter',
+        memorialId: memorial.id,
+        ownerUid: memorial.ownerUid,
+        type: EntryType.letter,
+        title: 'Sample letter page',
+        body:
+            'This is how your words will look in Journal PDF—quiet type on cream '
+            'paper, ready to print or gift.',
+        status: EntryStatus.saved,
+        entryDate: now,
+        createdAt: now,
+      ),
+      Entry(
+        id: '${templateEntryPrefix}memory',
+        memorialId: memorial.id,
+        ownerUid: memorial.ownerUid,
+        type: EntryType.memory,
+        title: 'Sample memory page',
+        body:
+            'A small detail, saved before it fades, becomes part of a finished book.',
+        status: EntryStatus.saved,
+        entryDate: now,
+        createdAt: now,
+      ),
+    ];
+  }
+}
+
+KeepsakeBookType primaryBookType(Set<KeepsakeBookType> types) {
+  if (types.isEmpty) {
+    return KeepsakeBookType.lettersToHeaven;
+  }
+  return types.first;
+}
+
+List<Entry> suggestedEntriesForBookTypes(
+  Set<KeepsakeBookType> types,
+  List<Entry> all,
+) {
+  if (types.isEmpty) {
+    return KeepsakeBookType.lettersToHeaven.suggestedEntries(all);
+  }
+  final seen = <String>{};
+  final merged = <Entry>[];
+  for (final type in types) {
+    for (final entry in type.suggestedEntries(all)) {
+      if (seen.add(entry.id)) {
+        merged.add(entry);
+      }
+    }
+  }
+  return merged;
+}

@@ -8,9 +8,9 @@ import 'package:uuid/uuid.dart';
 
 import '../../core/analytics/analytics.dart';
 import '../../core/billing/plan_entitlements.dart';
-import '../../core/billing/premium_upgrade_sheet.dart';
-import '../../core/billing/trust_paywall_copy.dart';
+import '../../core/media/image_webp_processor.dart';
 import '../../core/media/local_media_store.dart';
+import '../../core/media/media_upload_limits.dart';
 import '../../core/media/local_only_media_banner.dart';
 import '../../core/reviews/review_request_copy.dart';
 import '../../core/reviews/review_request_service.dart';
@@ -210,43 +210,52 @@ class _EntryEditorScreenState extends State<EntryEditorScreen> {
       premium: app.premium,
       currentPhotoCount: currentCount,
     )) {
-      await showPremiumUpgradeSheet(
-        context,
-        title: 'Unlimited photos',
-        body: '',
-        trigger: PaywallTrigger.browsePlans,
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'One photo per entry. Remove the current photo to add another.',
+          ),
+        ),
       );
       return;
     }
     final picker = ImagePicker();
     final file = await picker.pickImage(
       source: ImageSource.gallery,
-      maxWidth: 2048,
+      maxWidth: MediaUploadLimits.maxEdgePixels.toDouble(),
       imageQuality: 85,
     );
     if (file == null || !mounted) {
       return;
     }
-    final path = await _mediaStore.persistImage(
-      sourcePath: file.path,
-      ownerUid: app.uid,
-    );
-    final mediaId = _uuid.v4();
-    final placement = EntryPlacement(
-      id: _uuid.v4(),
-      mediaId: mediaId,
-      localPath: path,
-      x: 0.18 + (_placements.length % 3) * 0.06,
-      y: 0.18 + (_placements.length % 2) * 0.08,
-      scale: 0.36,
-    );
-    if (mounted) {
-      setState(() {
-        _photoPaths.add(path);
-        _mediaIds.add(mediaId);
-        _placements = [..._placements, placement];
-        _selectedPlacementId = placement.id;
-      });
+    try {
+      final path = await _mediaStore.persistImage(
+        sourcePath: file.path,
+        ownerUid: app.uid,
+      );
+      final mediaId = _uuid.v4();
+      final placement = EntryPlacement(
+        id: _uuid.v4(),
+        mediaId: mediaId,
+        localPath: path,
+        x: 0.18 + (_placements.length % 3) * 0.06,
+        y: 0.18 + (_placements.length % 2) * 0.08,
+        scale: 0.36,
+      );
+      if (mounted) {
+        setState(() {
+          _photoPaths.add(path);
+          _mediaIds.add(mediaId);
+          _placements = [..._placements, placement];
+          _selectedPlacementId = placement.id;
+        });
+      }
+    } on ImageProcessingException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message)),
+        );
+      }
     }
   }
 

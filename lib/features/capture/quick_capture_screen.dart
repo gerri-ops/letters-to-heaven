@@ -9,7 +9,9 @@ import '../../core/analytics/analytics.dart';
 import '../../core/billing/plan_entitlements.dart';
 import '../../core/billing/premium_upgrade_sheet.dart';
 import '../../core/billing/trust_paywall_copy.dart';
+import '../../core/media/image_webp_processor.dart';
 import '../../core/media/local_media_store.dart';
+import '../../core/media/media_upload_limits.dart';
 import '../../core/media/local_only_media_banner.dart';
 import '../../core/state/app_scope.dart';
 import '../../core/theme/app_theme.dart';
@@ -212,39 +214,52 @@ class _QuickCaptureScreenState extends State<QuickCaptureScreen> {
       premium: app.premium,
       currentPhotoCount: photoCount,
     )) {
-      await showPremiumUpgradeSheet(
-        context,
-        title: 'Unlimited photos',
-        body: '',
-        trigger: PaywallTrigger.browsePlans,
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Basic includes one photo per entry. Remove the current photo to add another.',
+          ),
+        ),
       );
       return;
     }
     final picker = ImagePicker();
     final file = await picker.pickImage(
       source: ImageSource.gallery,
-      maxWidth: 2048,
+      maxWidth: MediaUploadLimits.maxEdgePixels.toDouble(),
       imageQuality: 85,
     );
     if (file == null || !mounted) {
       return;
     }
-    final path = await _mediaStore.persistImage(
-      sourcePath: file.path,
-      ownerUid: app.uid,
-    );
-    setState(() {
-      _attachments.add(
-        _PendingMedia(
-          id: _uuid.v4(),
-          localPath: path,
-          mimeType: 'image/jpeg',
-          label: 'Photo',
-        ),
+    try {
+      final path = await _mediaStore.persistImage(
+        sourcePath: file.path,
+        ownerUid: app.uid,
       );
-      _mode = QuickCaptureMode.photo;
-    });
-    _bodyFocus.requestFocus();
+      setState(() {
+        // Basic stores a single photo per entry; Premium can add up to 3.
+        if (!app.premium) {
+          _attachments.removeWhere((a) => a.mimeType.startsWith('image/'));
+        }
+        _attachments.add(
+          _PendingMedia(
+            id: _uuid.v4(),
+            localPath: path,
+            mimeType: MediaUploadLimits.webpMimeType,
+            label: 'Photo',
+          ),
+        );
+        _mode = QuickCaptureMode.photo;
+      });
+      _bodyFocus.requestFocus();
+    } on ImageProcessingException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message)),
+        );
+      }
+    }
   }
 
   Future<void> _addAudio() async {

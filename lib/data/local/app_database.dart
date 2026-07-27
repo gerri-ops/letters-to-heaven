@@ -495,6 +495,18 @@ class AppDatabase {
     return Sqflite.firstIntValue(result) ?? 0;
   }
 
+  Future<int> countSavedEntries({required String memorialId}) async {
+    final db = await database;
+    final result = await db.rawQuery(
+      '''
+      SELECT COUNT(*) AS c FROM entries
+      WHERE memorial_id = ? AND deleted_at IS NULL AND status = ?
+      ''',
+      [memorialId, EntryStatus.saved.name],
+    );
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
+
   Future<List<Entry>> searchEntries({
     required String query,
     String? memorialId,
