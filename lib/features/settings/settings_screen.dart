@@ -189,10 +189,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             title: const Text(PrivacyTrustCopy.legalPolicyLabel),
-            subtitle: const Text('Legal detail — promises above come first'),
+            subtitle: const Text(PrivacyTrustCopy.legalPolicySubtitle),
             trailing: const Icon(Icons.open_in_new, size: 18),
             onTap: () => launchUrl(
-              Uri.parse('https://cardinalmemorials.com/privacy-policy/#lthapp'),
+              Uri.parse(PrivacyTrustCopy.legalPolicyUrl),
               mode: LaunchMode.externalApplication,
             ),
           ),

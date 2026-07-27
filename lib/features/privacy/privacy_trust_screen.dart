@@ -83,7 +83,7 @@ class PrivacyTrustScreen extends StatelessWidget {
           const SizedBox(height: 28),
           TextButton(
             onPressed: () => launchUrl(
-              Uri.parse('https://cardinalmemorials.com/privacy-policy/#lthapp'),
+              Uri.parse(PrivacyTrustCopy.legalPolicyUrl),
               mode: LaunchMode.externalApplication,
             ),
             child: const Text(PrivacyTrustCopy.legalPolicyLabel),

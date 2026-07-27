@@ -54,6 +54,10 @@ abstract final class PrivacyTrustCopy {
   ];
 
   static const openTrustLabel = 'Read our privacy promises';
-  static const legalPolicyLabel = 'Full privacy policy';
+  static const legalPolicyLabel = 'Privacy policy';
+  static const legalPolicyUrl =
+      'https://cardinalmemorials.com/privacy-policy/#lthapp';
+  static const legalPolicySubtitle =
+      'cardinalmemorials.com/privacy-policy/#lthapp';
   static const settingsSectionTitle = 'Privacy & trust';
 }
