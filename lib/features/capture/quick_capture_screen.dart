@@ -122,6 +122,19 @@ class _QuickCaptureScreenState extends State<QuickCaptureScreen> {
   }
 
   Future<void> _startSpeaking() async {
+    final app = AppScope.of(context);
+    if (!app.premium) {
+      await showPremiumUpgradeSheet(
+        context,
+        title: 'Voice & audio',
+        body: '',
+        trigger: PaywallTrigger.voiceRecording,
+      );
+      if (mounted) {
+        setState(() => _mode = QuickCaptureMode.type);
+      }
+      return;
+    }
     await _ensureSpeech();
     if (!_speechReady) {
       if (mounted) {
@@ -129,6 +142,7 @@ class _QuickCaptureScreenState extends State<QuickCaptureScreen> {
           _speechStatus =
               'Voice dictation is not available here. Type, or use your '
               'keyboard microphone.';
+          _mode = QuickCaptureMode.type;
         });
         _bodyFocus.requestFocus();
       }

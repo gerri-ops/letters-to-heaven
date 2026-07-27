@@ -38,7 +38,7 @@ abstract final class PlanEntitlements {
     'Secure encrypted cloud backup',
     'Cross-device syncing',
     'Unlimited photos',
-    'Voice recordings and audio uploads',
+    'Voice recordings, speak-to-text, and audio uploads',
     'Voice transcription (private; never clones a loved one’s voice)',
     'Video keepsakes',
     'Full prompt and template library',
