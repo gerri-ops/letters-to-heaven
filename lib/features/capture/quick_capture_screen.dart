@@ -13,12 +13,16 @@ import '../../core/media/local_media_store.dart';
 import '../../core/media/local_only_media_banner.dart';
 import '../../core/state/app_scope.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/artwork_assets.dart';
+import '../../core/theme/artwork_image.dart';
 import '../../core/theme/letters_app_bar.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/app_repository.dart';
 import '../entries/emotional_exit_door.dart';
 
 enum QuickCaptureMode { type, speak, photo, audio }
+
+enum QuickCaptureKind { note, cardinalVisit }
 
 class QuickCaptureScreen extends StatefulWidget {
   const QuickCaptureScreen({
@@ -40,6 +44,7 @@ class _QuickCaptureScreenState extends State<QuickCaptureScreen> {
   static const _uuid = Uuid();
 
   QuickCaptureMode _mode = QuickCaptureMode.type;
+  QuickCaptureKind _kind = QuickCaptureKind.note;
   bool _saving = false;
   bool _speechReady = false;
   bool _listening = false;
@@ -327,17 +332,19 @@ class _QuickCaptureScreenState extends State<QuickCaptureScreen> {
             },
       ];
 
+      final isCardinal = _kind == QuickCaptureKind.cardinalVisit;
       final entry = Entry(
         id: entryId,
         memorialId: memorial.id,
         ownerUid: uid,
-        type: EntryType.keepsake,
+        type: isCardinal ? EntryType.meaningfulMoment : EntryType.keepsake,
         title: '',
         body: _bodyController.text,
         status: EntryStatus.saved,
         mediaIds: mediaIds,
         extensionJson: {
           if (placements.isNotEmpty) 'placements': placements,
+          if (isCardinal) 'template': 'cardinal',
         },
         entryDate: DateTime.now(),
         createdAt: DateTime.now(),
@@ -347,7 +354,11 @@ class _QuickCaptureScreenState extends State<QuickCaptureScreen> {
       app.notifyContentChanged();
       // ignore: unawaited_futures
       app.syncService.syncNow(displayName: app.displayName, email: app.email);
-      PrivacySafeAnalytics.instance.logEntrySaved(type: EntryType.keepsake.name);
+      PrivacySafeAnalytics.instance.logEntrySaved(
+        type: isCardinal
+            ? EntryType.meaningfulMoment.name
+            : EntryType.keepsake.name,
+      );
 
       if (!mounted) {
         return;
@@ -485,6 +496,26 @@ class _QuickCaptureScreenState extends State<QuickCaptureScreen> {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
+                  _KindChip(
+                    label: 'Quick note',
+                    selected: _kind == QuickCaptureKind.note,
+                    icon: Icons.edit_note,
+                    onTap: () => setState(() => _kind = QuickCaptureKind.note),
+                  ),
+                  _KindChip(
+                    label: 'Cardinal visit',
+                    selected: _kind == QuickCaptureKind.cardinalVisit,
+                    artwork: ArtworkAssets.cardinal,
+                    onTap: () =>
+                        setState(() => _kind = QuickCaptureKind.cardinalVisit),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
                   _ModeChip(
                     label: 'Type',
                     icon: Icons.edit_outlined,
@@ -547,6 +578,47 @@ class _PendingMedia {
   final String localPath;
   final String mimeType;
   final String label;
+}
+
+class _KindChip extends StatelessWidget {
+  const _KindChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.icon,
+    this.artwork,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final IconData? icon;
+  final String? artwork;
+
+  @override
+  Widget build(BuildContext context) {
+    return FilterChip(
+      selected: selected,
+      showCheckmark: false,
+      avatar: artwork != null
+          ? Padding(
+              padding: const EdgeInsets.all(2),
+              child: ArtworkImage(
+                asset: artwork!,
+                height: 18,
+                width: 18,
+                fit: BoxFit.contain,
+              ),
+            )
+          : Icon(icon ?? Icons.circle_outlined, size: 18),
+      label: Text(label),
+      onSelected: (_) => onTap(),
+      selectedColor: AppColors.softBlush,
+      side: BorderSide(
+        color: selected ? AppColors.cardinalRed : AppColors.softBlush,
+      ),
+    );
+  }
 }
 
 class _ModeChip extends StatelessWidget {

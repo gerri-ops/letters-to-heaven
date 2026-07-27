@@ -69,14 +69,14 @@ class ProtectMemoriesScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                'Your first memory is saved on this device.',
+                'Your entry is saved on this device.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.headlineMedium?.copyWith(height: 1.25),
               ),
               const SizedBox(height: 14),
               Text(
-                'Create a private account to protect it with encrypted backup '
-                'and reach it from another device.',
+                'Register to save it with a private account—encrypted backup '
+                'and access from another device when you want them.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color: AppColors.mutedInk,
@@ -86,7 +86,7 @@ class ProtectMemoriesScreen extends StatelessWidget {
               const Spacer(flex: 3),
               FilledButton(
                 onPressed: () => _protectAcrossDevices(context),
-                child: const Text('Protect My Memories'),
+                child: const Text('Register to Save'),
               ),
               const SizedBox(height: 10),
               OutlinedButton(

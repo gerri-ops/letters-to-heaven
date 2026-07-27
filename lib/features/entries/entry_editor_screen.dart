@@ -16,6 +16,8 @@ import '../../core/reviews/review_request_copy.dart';
 import '../../core/reviews/review_request_service.dart';
 import '../../core/state/app_scope.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/artwork_assets.dart';
+import '../../core/theme/artwork_image.dart';
 import '../../core/theme/letters_app_bar.dart';
 import '../../core/utils/entry_helpers.dart';
 import '../../data/models/models.dart';
@@ -32,12 +34,14 @@ class EntryEditorScreen extends StatefulWidget {
     this.initialType,
     this.initialBody,
     this.promptId,
+    this.initialTemplateId,
   });
 
   final String? entryId;
   final EntryType? initialType;
   final String? initialBody;
   final String? promptId;
+  final String? initialTemplateId;
 
   @override
   State<EntryEditorScreen> createState() => _EntryEditorScreenState();
@@ -78,6 +82,7 @@ class _EntryEditorScreenState extends State<EntryEditorScreen> {
   void initState() {
     super.initState();
     _type = widget.initialType ?? EntryType.memory;
+    _templateId = widget.initialTemplateId;
     _entryDate = DateTime.now();
     _ensureExtControllers(_template);
     if (widget.initialBody != null) {
@@ -588,6 +593,17 @@ class _EntryEditorScreenState extends State<EntryEditorScreen> {
               children: [
                 for (final option in template.templateOptions)
                   FilterChip(
+                    avatar: option.id == 'cardinal'
+                        ? const Padding(
+                            padding: EdgeInsets.all(2),
+                            child: ArtworkImage(
+                              asset: ArtworkAssets.cardinal,
+                              height: 18,
+                              width: 18,
+                              fit: BoxFit.contain,
+                            ),
+                          )
+                        : null,
                     label: Text(option.label),
                     selected: _templateId == option.id,
                     showCheckmark: false,

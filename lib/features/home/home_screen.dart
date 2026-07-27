@@ -128,6 +128,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 ),
                 _MoreWayTile(
+                  leading: const CardinalAccent(size: 24),
+                  title: 'Cardinal visit',
+                  onTap: () {
+                    Navigator.pop(context);
+                    this.context.push(
+                      '/entry/new?type=meaningfulMoment&template=cardinal',
+                    );
+                  },
+                ),
+                _MoreWayTile(
                   icon: Icons.lightbulb_outline,
                   title: 'One optional question',
                   onTap: () {
@@ -365,19 +375,22 @@ class _PrimaryAction extends StatelessWidget {
 
 class _MoreWayTile extends StatelessWidget {
   const _MoreWayTile({
-    required this.icon,
     required this.title,
     required this.onTap,
+    this.icon,
+    this.leading,
   });
 
-  final IconData icon;
+  final IconData? icon;
+  final Widget? leading;
   final String title;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(icon, color: AppColors.burgundy),
+      leading: leading ??
+          Icon(icon ?? Icons.chevron_right, color: AppColors.burgundy),
       title: Text(title),
       trailing: const Icon(Icons.chevron_right),
       onTap: onTap,

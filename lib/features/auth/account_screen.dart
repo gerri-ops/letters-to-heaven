@@ -231,22 +231,22 @@ class _AccountScreenState extends State<AccountScreen>
   @override
   Widget build(BuildContext context) {
     final intro = _isBackupOffer
-        ? 'Protect what you already saved with a private account.'
+        ? 'Register to save what you already wrote—privately, on your terms.'
         : 'Optional—create an account when you want encrypted backup.';
     final helper = _isBackupOffer
-        ? 'Your memories stay on this device until you create an account. '
-            'Then they can sync privately to your other devices.'
+        ? 'Your entry is already on this device. Register only if you want '
+            'encrypted backup and access from another device.'
         : 'Your account uses Firebase Auth so photos can back up to '
             'private cloud storage when you enable it in Settings.';
 
     return Scaffold(
       appBar: LettersAppBar(
-        title: Text(_isBackupOffer ? 'Protect my memories' : 'Your account'),
+        title: Text(_isBackupOffer ? 'Register to save' : 'Your account'),
         intro: intro,
         bottom: TabBar(
           controller: _tabs,
           tabs: const [
-            Tab(text: 'Create account'),
+            Tab(text: 'Register'),
             Tab(text: 'Sign in'),
           ],
         ),
@@ -263,7 +263,7 @@ class _AccountScreenState extends State<AccountScreen>
             error: _error,
             busy: _busy,
             onSubmit: _createAccount,
-            submitLabel: _isBackupOffer ? 'Protect My Memories' : 'Create account',
+            submitLabel: _isBackupOffer ? 'Register to Save' : 'Create account',
             helperText: helper,
           ),
           _AccountForm(

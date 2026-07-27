@@ -244,11 +244,13 @@ GoRouter createAppRouter(AppState appState) {
               EntryType.memory;
           final body = state.uri.queryParameters['body'];
           final promptId = state.uri.queryParameters['promptId'];
+          final template = state.uri.queryParameters['template'];
           return EntryEditorScreen(
             entryId: null,
             initialType: type,
             initialBody: body,
             promptId: promptId,
+            initialTemplateId: template,
           );
         },
       ),
