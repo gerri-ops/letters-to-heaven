@@ -12,6 +12,7 @@ import '../../core/state/app_scope.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/letters_app_bar.dart';
 import '../../data/repositories/app_repository.dart';
+import '../capture/quick_capture_screen.dart';
 
 class MemorialSetupScreen extends StatefulWidget {
   const MemorialSetupScreen({super.key, this.isAdditional = false});
@@ -41,6 +42,23 @@ class _MemorialSetupScreenState extends State<MemorialSetupScreen> {
     'Pet',
     'Other',
   ];
+
+  void _goToChosenFirstAction(BuildContext context, AppState app) {
+    switch (app.onboardingIntent) {
+      case OnboardingIntent.sentence:
+        context.go('/entry/new?type=letter');
+      case OnboardingIntent.detail:
+        context.go('/entry/new?type=memory');
+      case OnboardingIntent.photo:
+        context.go('/capture?mode=${QuickCaptureMode.photo.name}');
+      case OnboardingIntent.voice:
+        context.go('/voice-keepsakes');
+      case OnboardingIntent.lookAround:
+      case null:
+      default:
+        context.push('/privacy');
+    }
+  }
 
   Future<void> _pickPhoto() async {
     final picker = ImagePicker();
@@ -92,7 +110,7 @@ class _MemorialSetupScreenState extends State<MemorialSetupScreen> {
         app.notifyContentChanged();
         context.go('/shell/home');
       } else {
-        context.push('/privacy');
+        _goToChosenFirstAction(context, app);
       }
     } on MemorialLimitExceeded catch (_) {
       if (!mounted) return;

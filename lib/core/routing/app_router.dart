@@ -6,7 +6,6 @@ import '../../features/auth/account_screen.dart';
 import '../../features/capture/quick_capture_screen.dart';
 import '../../features/entries/entry_detail_screen.dart';
 import '../../features/entries/entry_editor_screen.dart';
-import '../../features/gifts/gift_premium_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/keepsake/export_screen.dart';
 import '../../features/keepsake/keepsake_catalog.dart';
@@ -39,10 +38,14 @@ import '../utils/entry_helpers.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorHomeKey = GlobalKey<NavigatorState>(debugLabel: 'home');
-final _shellNavigatorLibraryKey = GlobalKey<NavigatorState>(debugLabel: 'library');
-final _shellNavigatorKeepsakeKey = GlobalKey<NavigatorState>(debugLabel: 'keepsake');
+final _shellNavigatorLibraryKey =
+    GlobalKey<NavigatorState>(debugLabel: 'library');
+final _shellNavigatorKeepsakeKey =
+    GlobalKey<NavigatorState>(debugLabel: 'keepsake');
 final _shellNavigatorSubscribeKey =
     GlobalKey<NavigatorState>(debugLabel: 'subscribe');
+
+Widget _chrome(Widget child) => AppChromeShell(child: child);
 
 GoRouter createAppRouter(AppState appState) {
   return GoRouter(
@@ -54,9 +57,14 @@ GoRouter createAppRouter(AppState appState) {
         return null;
       }
       final loc = state.matchedLocation;
-      if (loc.startsWith('/entry') ||
-          loc == '/prompts' ||
+
+      // First capture paths stay open during onboarding so the chosen action
+      // can happen right after naming a memorial.
+      final firstActionPaths = loc.startsWith('/entry') ||
           loc == '/capture' ||
+          loc.startsWith('/voice-keepsakes');
+
+      if (loc == '/prompts' ||
           loc == '/first-save-success' ||
           loc == '/protect-memories' ||
           loc == '/paywall' ||
@@ -65,11 +73,12 @@ GoRouter createAppRouter(AppState appState) {
           loc == '/export' ||
           loc == '/memorials' ||
           loc == '/memorial/new' ||
-          loc == '/gift' ||
           loc == '/retention' ||
-          loc == '/privacy-trust') {
+          loc == '/privacy-trust' ||
+          firstActionPaths) {
         return null;
       }
+
       final onboardingRoutes = {
         '/welcome',
         '/privacy',
@@ -81,20 +90,41 @@ GoRouter createAppRouter(AppState appState) {
         '/first-save-success',
         '/paywall',
       };
-      if (!appState.onboardingComplete && !onboardingRoutes.contains(loc)) {
-        if (appState.onboardingIntent == null) {
-          return loc == '/welcome' || loc == '/first-action' ? null : '/welcome';
+
+      if (!appState.onboardingComplete) {
+        // Shell tabs stay closed until privacy + pace are done.
+        if (loc.startsWith('/shell/')) {
+          if (appState.onboardingIntent == null) {
+            return '/welcome';
+          }
+          if (appState.currentMemorial == null) {
+            return '/memorial-setup';
+          }
+          if (!appState.privacyAccepted) {
+            return '/privacy';
+          }
+          if (!appState.paceAccepted) {
+            return '/pace-promise';
+          }
+          return null;
         }
-        if (appState.currentMemorial == null) {
-          return '/memorial-setup';
+        if (!onboardingRoutes.contains(loc)) {
+          if (appState.onboardingIntent == null) {
+            return loc == '/welcome' || loc == '/first-action'
+                ? null
+                : '/welcome';
+          }
+          if (appState.currentMemorial == null) {
+            return '/memorial-setup';
+          }
+          if (!appState.privacyAccepted) {
+            return '/privacy';
+          }
+          if (!appState.paceAccepted) {
+            return '/pace-promise';
+          }
+          return '/shell/home';
         }
-        if (!appState.privacyAccepted) {
-          return '/privacy';
-        }
-        if (!appState.paceAccepted) {
-          return '/pace-promise';
-        }
-        return '/shell/home';
       }
       if (appState.onboardingComplete &&
           (loc == '/welcome' ||
@@ -121,14 +151,12 @@ GoRouter createAppRouter(AppState appState) {
       ),
       GoRoute(
         path: '/memorial/new',
-        parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) =>
-            const MemorialSetupScreen(isAdditional: true),
+            _chrome(const MemorialSetupScreen(isAdditional: true)),
       ),
       GoRoute(
         path: '/memorials',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const MemorialsScreen(),
+        builder: (context, state) => _chrome(const MemorialsScreen()),
       ),
       GoRoute(
         path: '/privacy',
@@ -136,8 +164,7 @@ GoRouter createAppRouter(AppState appState) {
       ),
       GoRoute(
         path: '/privacy-trust',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const PrivacyTrustScreen(),
+        builder: (context, state) => _chrome(const PrivacyTrustScreen()),
       ),
       GoRoute(
         path: '/pace-promise',
@@ -145,36 +172,34 @@ GoRouter createAppRouter(AppState appState) {
       ),
       GoRoute(
         path: '/account',
-        builder: (context, state) => const AccountScreen(),
+        builder: (context, state) => _chrome(const AccountScreen()),
       ),
       GoRoute(
         path: '/first-save-success',
-        parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final entryId = state.uri.queryParameters['entryId'] ?? '';
-          return FirstSaveSuccessScreen(entryId: entryId);
+          return _chrome(FirstSaveSuccessScreen(entryId: entryId));
         },
       ),
       GoRoute(
         path: '/protect-memories',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const ProtectMemoriesScreen(),
+        builder: (context, state) =>
+            _chrome(const ProtectMemoriesScreen()),
       ),
       GoRoute(
         path: '/voice-keepsakes',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const VoiceKeepsakesScreen(),
+        builder: (context, state) =>
+            _chrome(const VoiceKeepsakesScreen()),
       ),
       GoRoute(
         path: '/voice-keepsakes/new',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const VoiceKeepsakeEditorScreen(),
+        builder: (context, state) =>
+            _chrome(const VoiceKeepsakeEditorScreen()),
       ),
       GoRoute(
         path: '/voice-keepsakes/:id/edit',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => VoiceKeepsakeEditorScreen(
-          entryId: state.pathParameters['id'],
+        builder: (context, state) => _chrome(
+          VoiceKeepsakeEditorScreen(entryId: state.pathParameters['id']),
         ),
       ),
       StatefulShellRoute.indexedStack(
@@ -213,9 +238,10 @@ GoRouter createAppRouter(AppState appState) {
             routes: [
               GoRoute(
                 path: '/shell/subscribe',
-                builder: (context, state) => const TrustPaywallScreen(
+                builder: (context, state) => TrustPaywallScreen(
                   trigger: PaywallTrigger.browsePlans,
                   embeddedInShell: true,
+                  checkoutResult: state.uri.queryParameters['checkout'],
                 ),
               ),
             ],
@@ -224,7 +250,6 @@ GoRouter createAppRouter(AppState appState) {
       ),
       GoRoute(
         path: '/capture',
-        parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final modeName = state.uri.queryParameters['mode'];
           var mode = QuickCaptureMode.type;
@@ -234,131 +259,120 @@ GoRouter createAppRouter(AppState appState) {
               break;
             }
           }
-          return QuickCaptureScreen(initialMode: mode);
+          return _chrome(QuickCaptureScreen(initialMode: mode));
         },
       ),
       GoRoute(
         path: '/entry/new',
-        parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final type = entryTypeFromName(state.uri.queryParameters['type']) ??
               EntryType.memory;
           final body = state.uri.queryParameters['body'];
           final promptId = state.uri.queryParameters['promptId'];
           final template = state.uri.queryParameters['template'];
-          return EntryEditorScreen(
-            entryId: null,
-            initialType: type,
-            initialBody: body,
-            promptId: promptId,
-            initialTemplateId: template,
+          return _chrome(
+            EntryEditorScreen(
+              entryId: null,
+              initialType: type,
+              initialBody: body,
+              promptId: promptId,
+              initialTemplateId: template,
+            ),
           );
         },
       ),
       GoRoute(
         path: '/entry/:id',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) =>
-            EntryDetailScreen(entryId: state.pathParameters['id']!),
+        builder: (context, state) => _chrome(
+          EntryDetailScreen(entryId: state.pathParameters['id']!),
+        ),
       ),
       GoRoute(
         path: '/entry/:id/edit',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => EntryEditorScreen(
-          entryId: state.pathParameters['id'],
+        builder: (context, state) => _chrome(
+          EntryEditorScreen(entryId: state.pathParameters['id']),
         ),
       ),
       GoRoute(
         path: '/prompts',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const PromptsScreen(),
+        builder: (context, state) => _chrome(const PromptsScreen()),
       ),
       GoRoute(
         path: '/keepsake-preview',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => KeepsakePreviewScreen(
-          initialTheme: ExportThemeX.fromLegacyName(
-            state.uri.queryParameters['theme'],
+        builder: (context, state) => _chrome(
+          KeepsakePreviewScreen(
+            initialTheme: ExportThemeX.fromLegacyName(
+              state.uri.queryParameters['theme'],
+            ),
           ),
         ),
       ),
       GoRoute(
         path: '/export',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => ExportScreen(
-          initialTheme: ExportThemeX.fromLegacyName(
-            state.uri.queryParameters['theme'],
+        builder: (context, state) => _chrome(
+          ExportScreen(
+            initialTheme: ExportThemeX.fromLegacyName(
+              state.uri.queryParameters['theme'],
+            ),
           ),
         ),
       ),
       GoRoute(
         path: '/search',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const SearchScreen(),
+        builder: (context, state) => _chrome(const SearchScreen()),
       ),
       GoRoute(
         path: '/timeline',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const TimelineScreen(),
+        builder: (context, state) => _chrome(const TimelineScreen()),
       ),
       GoRoute(
         path: '/settings',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const SettingsScreen(),
-      ),
-      GoRoute(
-        path: '/gift',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) {
-          final redeem = state.uri.queryParameters['mode'] == 'redeem';
-          return GiftPremiumScreen(
-            initialMode:
-                redeem ? GiftScreenMode.redeem : GiftScreenMode.give,
-          );
-        },
+        builder: (context, state) => _chrome(const SettingsScreen()),
       ),
       GoRoute(
         path: '/paywall',
-        parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final trigger = PaywallTriggerX.fromQuery(
             state.uri.queryParameters['trigger'],
           );
           final next = state.uri.queryParameters['next'];
-          return TrustPaywallScreen(
-            trigger: trigger,
-            nextPath: next,
+          return _chrome(
+            TrustPaywallScreen(
+              trigger: trigger,
+              nextPath: next,
+              checkoutResult: state.uri.queryParameters['checkout'],
+            ),
           );
         },
       ),
       GoRoute(
         path: '/subscription',
-        parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final trigger = PaywallTriggerX.fromQuery(
             state.uri.queryParameters['trigger'],
           );
           final next = state.uri.queryParameters['next'];
-          return TrustPaywallScreen(
-            trigger: trigger,
-            nextPath: next,
+          return _chrome(
+            TrustPaywallScreen(
+              trigger: trigger,
+              nextPath: next,
+              checkoutResult: state.uri.queryParameters['checkout'],
+            ),
           );
         },
       ),
       GoRoute(
         path: '/retention',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const RetentionSettingsScreen(),
+        builder: (context, state) =>
+            _chrome(const RetentionSettingsScreen()),
       ),
       GoRoute(
         path: '/reminders',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const RemindersScreen(),
+        builder: (context, state) => _chrome(const RemindersScreen()),
       ),
       GoRoute(
         path: '/data-rights',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const DataRightsScreen(),
+        builder: (context, state) => _chrome(const DataRightsScreen()),
       ),
     ],
   );

@@ -23,6 +23,7 @@ class _AccountScreenState extends State<AccountScreen>
   final _nameController = TextEditingController();
   bool _busy = false;
   String? _error;
+  bool _prefilledName = false;
 
   String get _next {
     return GoRouterState.of(context).uri.queryParameters['next'] ?? '';
@@ -38,6 +39,19 @@ class _AccountScreenState extends State<AccountScreen>
   void initState() {
     super.initState();
     _tabs = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_prefilledName) {
+      return;
+    }
+    _prefilledName = true;
+    final existing = AppScope.of(context).displayName.trim();
+    if (existing.isNotEmpty) {
+      _nameController.text = existing;
+    }
   }
 
   @override
@@ -176,8 +190,10 @@ class _AccountScreenState extends State<AccountScreen>
           return;
         }
         final prefs = await SharedPreferences.getInstance();
-        final displayName =
-            prefs.getString('user_display_name') ?? email.split('@').first;
+        final enteredName = _nameController.text.trim();
+        final displayName = enteredName.isNotEmpty
+            ? enteredName
+            : prefs.getString('user_display_name') ?? email.split('@').first;
         if (!mounted) {
           return;
         }
@@ -267,7 +283,7 @@ class _AccountScreenState extends State<AccountScreen>
             helperText: helper,
           ),
           _AccountForm(
-            showName: false,
+            showName: true,
             requireEmail: true,
             emailController: _emailController,
             passwordController: _passwordController,
@@ -276,7 +292,10 @@ class _AccountScreenState extends State<AccountScreen>
             busy: _busy,
             onSubmit: _signIn,
             submitLabel: 'Sign in',
-            helperText: 'Sign in with the email and password you created.',
+            helperText:
+                'Sign in with the email and password you created. You can choose '
+                'a screen name to use instead of the default.',
+            nameLabel: 'Screen name (optional)',
           ),
         ],
       ),
@@ -296,6 +315,7 @@ class _AccountForm extends StatelessWidget {
     required this.onSubmit,
     required this.submitLabel,
     required this.helperText,
+    this.nameLabel = 'Display name',
   });
 
   final bool showName;
@@ -308,6 +328,7 @@ class _AccountForm extends StatelessWidget {
   final VoidCallback onSubmit;
   final String submitLabel;
   final String helperText;
+  final String nameLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -319,7 +340,7 @@ class _AccountForm extends StatelessWidget {
         if (showName)
           TextField(
             controller: nameController,
-            decoration: const InputDecoration(labelText: 'Display name'),
+            decoration: InputDecoration(labelText: nameLabel),
             textInputAction: TextInputAction.next,
           ),
         if (showName) const SizedBox(height: 12),

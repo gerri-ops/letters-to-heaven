@@ -27,8 +27,15 @@ abstract final class TrustPaywallCopy {
       'Your existing memories remain available after cancellation. '
       'Your journal is private by default.';
 
-  static const startTrialLabel = 'Start 14-Day Free Trial';
+  static const startTrialLabel = 'Try 14 days free on this device';
+  static const choosePlanLabel = 'Choose a Premium plan';
   static const continueBasicLabel = 'Continue With Basic';
+
+  static const localTrialNotice =
+      'Free on this device only — no card required.';
+  static const stripePlanNotice =
+      'Subscribe with Stripe for private backup across devices. '
+      'Stripe plans may include their own trial at checkout.';
 
   /// Soft upgrade when someone needs a second memorial (or more).
   static const secondMemorialHeadline =

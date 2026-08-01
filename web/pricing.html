@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Letters to Heaven — Premium</title>
+  <style>
+    :root {
+      --cream: #f7f1e8;
+      --ink: #3d2c29;
+      --burgundy: #7a2e2e;
+      --muted: #6b5a52;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      background: linear-gradient(180deg, #faf6f0 0%, var(--cream) 100%);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+    header {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 28px 20px 8px;
+      text-align: center;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 1.6rem;
+      color: var(--burgundy);
+      font-weight: 500;
+    }
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 1rem;
+    }
+    .back {
+      display: inline-block;
+      margin-top: 14px;
+      color: var(--burgundy);
+      text-decoration: none;
+      font-size: 0.95rem;
+    }
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 12px 12px 40px;
+    }
+    .note {
+      max-width: 720px;
+      margin: 0 auto 16px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .error {
+      max-width: 640px;
+      margin: 24px auto;
+      padding: 16px;
+      border: 1px solid #e0cfc4;
+      background: #fffaf6;
+      border-radius: 8px;
+      text-align: center;
+      color: var(--burgundy);
+    }
+  </style>
+  <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Letters to Heaven Premium</h1>
+    <p>Choose monthly or annual. Stripe hosts checkout securely.</p>
+    <a class="back" id="backLink" href="/shell/subscribe">← Back to the app</a>
+  </header>
+  <main>
+    <p class="note" id="status">Loading plans…</p>
+    <div id="tableHost"></div>
+  </main>
+  <script>
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var uid = params.get('uid') || '';
+      var email = params.get('email') || '';
+      var back = params.get('return') || '/shell/subscribe';
+      document.getElementById('backLink').setAttribute('href', back);
+
+      var host = document.getElementById('tableHost');
+      var status = document.getElementById('status');
+
+      if (!uid) {
+        status.className = 'error';
+        status.textContent =
+          'Sign in to Letters to Heaven first, then open Premium plans from the Subscribe tab.';
+        return;
+      }
+
+      var table = document.createElement('stripe-pricing-table');
+      table.setAttribute('pricing-table-id', 'prctbl_1Txx4WDJyVZEDaoIqlN5lxHe');
+      table.setAttribute(
+        'publishable-key',
+        'pk_live_51S06UADJyVZEDaoICOd8BXNTAWEMf7EYErW7eimHlrjGoZeW0QusDMJtJzfGdu9uYuICNcSyIu2U6YbSrnTNYPvq00RlPNT156'
+      );
+      table.setAttribute('client-reference-id', uid);
+      if (email) {
+        table.setAttribute('customer-email', email);
+      }
+      host.appendChild(table);
+      status.textContent =
+        'After checkout, you will return to the app and Premium unlocks automatically.';
+    })();
+  </script>
+</body>
+</html>

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/state/app_scope.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/letters_app_bar.dart';
 import 'keepsake_catalog.dart';
@@ -10,18 +9,12 @@ class KeepsakeScreen extends StatelessWidget {
   const KeepsakeScreen({super.key});
 
   void _openExport(BuildContext context, ExportTheme theme) {
-    final premium = AppScope.of(context).premium;
     final themeParam = Uri.encodeComponent(theme.name);
-    context.push(
-      premium
-          ? '/export?theme=$themeParam'
-          : '/keepsake-preview?theme=$themeParam',
-    );
+    context.push('/export?theme=$themeParam');
   }
 
   @override
   Widget build(BuildContext context) {
-    final premium = AppScope.of(context).premium;
     final theme = Theme.of(context);
     return Scaffold(
       appBar: const LettersAppBar(
@@ -60,9 +53,7 @@ class KeepsakeScreen extends StatelessWidget {
           const SizedBox(height: 8),
           FilledButton(
             onPressed: () => _openExport(context, ExportTheme.journalPdf),
-            child: Text(
-              premium ? 'Open Keepsake Builder' : 'Preview a keepsake',
-            ),
+            child: const Text('Open Keepsake Builder'),
           ),
           const SizedBox(height: 22),
           Text(

@@ -1,34 +1,44 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../data/models/models.dart';
 import 'keepsake_catalog.dart';
 
 class KeepsakeBookTypePicker extends StatelessWidget {
   const KeepsakeBookTypePicker({
     required this.selected,
     required this.onChanged,
+    this.entries = const [],
     super.key,
   });
 
+  /// Empty set means "All".
   final Set<KeepsakeBookType> selected;
   final ValueChanged<Set<KeepsakeBookType>> onChanged;
+  final List<Entry> entries;
 
   @override
   Widget build(BuildContext context) {
+    final available = availableBookTypesFor(entries);
+    final allSelected = selected.isEmpty;
+
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: [
-        for (final book in KeepsakeBookType.values)
+        _BookChip(
+          label: 'All',
+          selected: allSelected,
+          onTap: () => onChanged({}),
+        ),
+        for (final book in available)
           _BookChip(
             label: book.shortLabel,
             selected: selected.contains(book),
             onTap: () {
               final next = Set<KeepsakeBookType>.from(selected);
               if (next.contains(book)) {
-                if (next.length > 1) {
-                  next.remove(book);
-                }
+                next.remove(book);
               } else {
                 next.add(book);
               }

@@ -45,7 +45,6 @@ abstract final class PlanEntitlements {
     'Video keepsakes',
     'Full prompt and template library',
     'Multiple memorials — a separate private place for each person or pet',
-    'One-year Premium gift (non-renewing) for friends and family',
     'Complete PDF Keepsake Builder (giftable books, not a data dump)',
     'Three keepsake exports: Journal PDF, Simple, and Ink Saver',
     'Private remembrance-date controls',

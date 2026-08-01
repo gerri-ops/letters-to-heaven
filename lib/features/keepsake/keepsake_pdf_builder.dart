@@ -59,9 +59,6 @@ class KeepsakePdfBuilder {
     if (previewOnly && sorted.length > 3) {
       sorted = sorted.take(3).toList();
     }
-    if (bookType == KeepsakeBookType.onePageRemembrance && sorted.length > 1) {
-      sorted = sorted.take(1).toList();
-    }
 
     final prepared = <String, List<_PdfPlacement>>{};
     for (final entry in sorted) {
@@ -73,30 +70,6 @@ class KeepsakePdfBuilder {
       author: 'Letters to Heaven',
       subject: 'Private memorial keepsake',
     );
-
-    if (bookType == KeepsakeBookType.onePageRemembrance) {
-      doc.addPage(
-        pw.Page(
-          pageFormat: PdfPageFormat.letter,
-          margin: const pw.EdgeInsets.fromLTRB(48, 52, 48, 52),
-          build: (context) => _OnePageRemembrance(
-            memorial: memorial,
-            entry: sorted.isEmpty ? null : sorted.first,
-            placements: sorted.isEmpty
-                ? const []
-                : prepared[sorted.first.id] ?? const [],
-            palette: palette,
-            titleFont: titleFont,
-            titleItalic: titleItalic,
-            bodyFont: bodyFont,
-            bodyBold: bodyBold,
-            art: art,
-            theme: theme,
-          ),
-        ),
-      );
-      return doc;
-    }
 
     doc.addPage(
       pw.Page(
@@ -438,17 +411,19 @@ class _CoverPage extends pw.StatelessWidget {
             letterSpacing: 2.4,
           ),
         ),
-        pw.SizedBox(height: 10),
-        pw.Text(
-          bookType.title.toUpperCase(),
-          textAlign: pw.TextAlign.center,
-          style: pw.TextStyle(
-            font: bodyFont,
-            fontSize: 10,
-            color: palette.brand,
-            letterSpacing: 1.2,
+        if (bookType != KeepsakeBookType.lettersToHeaven) ...[
+          pw.SizedBox(height: 10),
+          pw.Text(
+            bookType.title.toUpperCase(),
+            textAlign: pw.TextAlign.center,
+            style: pw.TextStyle(
+              font: bodyFont,
+              fontSize: 10,
+              color: palette.brand,
+              letterSpacing: 1.2,
+            ),
           ),
-        ),
+        ],
         pw.SizedBox(height: 12),
         pw.Container(width: 56, height: 1, color: palette.accent),
         pw.SizedBox(height: 28),
@@ -892,111 +867,6 @@ class _PdfScrapbook extends pw.StatelessWidget {
                 ),
               ),
             ),
-        ],
-      ),
-    );
-  }
-}
-
-class _OnePageRemembrance extends pw.StatelessWidget {
-  _OnePageRemembrance({
-    required this.memorial,
-    required this.entry,
-    required this.placements,
-    required this.palette,
-    required this.titleFont,
-    required this.titleItalic,
-    required this.bodyFont,
-    required this.bodyBold,
-    required this.art,
-    required this.theme,
-  });
-
-  final Memorial memorial;
-  final Entry? entry;
-  final List<_PdfPlacement> placements;
-  final _Palette palette;
-  final pw.Font titleFont;
-  final pw.Font titleItalic;
-  final pw.Font bodyFont;
-  final pw.Font bodyBold;
-  final _Art? art;
-  final ExportTheme theme;
-
-  @override
-  pw.Widget build(pw.Context context) {
-    final body = entry?.body.trim() ?? '';
-    final title = entry?.title.trim() ?? '';
-    return pw.Container(
-      color: palette.pageBg,
-      child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.center,
-        children: [
-          pw.Text(
-            'IN REMEMBRANCE',
-            style: pw.TextStyle(
-              font: bodyFont,
-              fontSize: 9,
-              color: palette.muted,
-              letterSpacing: 2.2,
-            ),
-          ),
-          pw.SizedBox(height: 16),
-          pw.Text(
-            memorial.displayName,
-            textAlign: pw.TextAlign.center,
-            style: pw.TextStyle(
-              font: titleFont,
-              fontSize: 26,
-              color: palette.brand,
-            ),
-          ),
-          pw.SizedBox(height: 10),
-          pw.Container(width: 48, height: 1, color: palette.accent),
-          pw.SizedBox(height: 18),
-          if (title.isNotEmpty)
-            pw.Text(
-              title,
-              textAlign: pw.TextAlign.center,
-              style: pw.TextStyle(
-                font: titleItalic,
-                fontSize: 13,
-                color: palette.ink,
-              ),
-            ),
-          if (body.isNotEmpty) ...[
-            pw.SizedBox(height: 14),
-            pw.Text(
-              body.length > 900 ? '${body.substring(0, 900)}…' : body,
-              textAlign: pw.TextAlign.center,
-              style: pw.TextStyle(
-                font: bodyFont,
-                fontSize: 11,
-                color: palette.ink,
-                lineSpacing: 1.45,
-              ),
-            ),
-          ],
-          if (placements.isNotEmpty) ...[
-            pw.SizedBox(height: 20),
-            pw.Image(
-              placements.first.image,
-              height: 160,
-              fit: pw.BoxFit.contain,
-            ),
-          ] else if (art != null) ...[
-            pw.SizedBox(height: 24),
-            pw.Image(art!.dogwood, height: 72, fit: pw.BoxFit.contain),
-          ],
-          pw.Spacer(),
-          pw.Text(
-            'Letters to Heaven · Cardinal Memorials',
-            style: pw.TextStyle(
-              font: bodyFont,
-              fontSize: 8,
-              color: palette.muted,
-            ),
-          ),
         ],
       ),
     );

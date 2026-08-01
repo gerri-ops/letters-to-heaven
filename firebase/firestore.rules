@@ -34,7 +34,9 @@ service cloud.firestore {
       }
 
       match /entitlements/{entitlementId} {
-        allow read, write: if isOwner(uid);
+        // Premium status is written only by Cloud Functions (Stripe webhooks).
+        allow read: if isOwner(uid);
+        allow write: if false;
       }
     }
 

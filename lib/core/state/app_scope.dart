@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/app_repository.dart';
 import '../analytics/analytics.dart';
+import '../billing/stripe_billing_service.dart';
 import '../firebase/auth_service.dart';
 import '../reminders/reminder_copy.dart';
 import '../retention/retention_copy.dart';
@@ -74,6 +75,8 @@ class AppState extends ChangeNotifier {
   bool onPremiumTrial = false;
   /// True when access comes from a non-renewing gift year.
   bool onGiftPremium = false;
+  /// True when Premium is backed by an active Stripe subscription/trial.
+  bool onStripePremium = false;
   /// End of the free trial, if one was started. Never shown as a home countdown.
   DateTime? premiumTrialEndsAt;
   /// End of gift Premium, if active. Never auto-renews.
@@ -125,9 +128,9 @@ class AppState extends ChangeNotifier {
     privacyAccepted = prefs.getBool(_keyPrivacyAccepted) ?? false;
     paceAccepted = prefs.getBool(_keyPaceAccepted) ?? false;
     onboardingIntent = prefs.getString(_keyOnboardingIntent);
-    // Existing installs already past welcome should not be forced back.
-    if (!privacyAccepted &&
-        (onboardingComplete || uid != null || prefs.getString(_keyMemorialId) != null)) {
+    // Existing installs that already finished onboarding should not be forced
+    // back through privacy/pace. Do not auto-accept for in-progress onboarding.
+    if (!privacyAccepted && onboardingComplete) {
       privacyAccepted = true;
       paceAccepted = true;
       await prefs.setBool(_keyPrivacyAccepted, true);
@@ -189,6 +192,7 @@ class AppState extends ChangeNotifier {
       await prefs.setString(_keyUid, firebaseUid);
     }
     await _refreshPremiumState();
+    await syncStripeEntitlement(notify: false);
     final memorialId = prefs.getString(_keyMemorialId);
     if (memorialId != null) {
       currentMemorial = await repository.getMemorial(memorialId);
@@ -221,6 +225,7 @@ class AppState extends ChangeNotifier {
         } else {
           notifyContentChanged();
         }
+        await syncStripeEntitlement();
       });
     }
   }
@@ -256,6 +261,19 @@ class AppState extends ChangeNotifier {
     // Registered accounts sync journal data to Firestore.
     // ignore: unawaited_futures
     syncService.syncNow(displayName: newDisplayName, email: newEmail);
+  }
+
+  Future<void> setScreenName(String value) async {
+    final next = value.trim();
+    if (next.isEmpty || next == displayName) {
+      return;
+    }
+    displayName = next;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyDisplayName, next);
+    notifyListeners();
+    // ignore: unawaited_futures
+    syncService.syncNow(displayName: next, email: email);
   }
 
   /// True when the user has a Firebase/email account (not device-only).
@@ -367,6 +385,34 @@ class AppState extends ChangeNotifier {
     onGiftPremium = !subscribed && await repository.isGiftPremiumActive();
     giftPremiumExpiresAt =
         onGiftPremium ? await repository.giftPremiumExpiresAt() : null;
+  }
+
+  /// Pulls Stripe entitlement from Firestore into the local paid Premium flag.
+  Future<void> syncStripeEntitlement({bool notify = true}) async {
+    final authUid = AuthService.instance.firebaseUid;
+    if (authUid == null || authUid.isEmpty) {
+      onStripePremium = false;
+      if (notify) {
+        notifyListeners();
+      }
+      return;
+    }
+    final entitlement =
+        await StripeBillingService.instance.fetchEntitlement(uid: authUid);
+    if (entitlement == null) {
+      onStripePremium = false;
+      await _refreshPremiumState();
+      if (notify) {
+        notifyListeners();
+      }
+      return;
+    }
+    onStripePremium = entitlement.isStripeSubscriber;
+    await repository.setPremium(entitlement.entitled);
+    await _refreshPremiumState();
+    if (notify) {
+      notifyListeners();
+    }
   }
 
   Future<void> setPremiumLocal(bool value) async {
@@ -598,6 +644,7 @@ class AppState extends ChangeNotifier {
     premium = false;
     onPremiumTrial = false;
     onGiftPremium = false;
+    onStripePremium = false;
     premiumTrialEndsAt = null;
     giftPremiumExpiresAt = null;
     await repository.setPremium(false);

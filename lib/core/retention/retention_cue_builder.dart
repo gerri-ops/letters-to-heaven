@@ -208,7 +208,7 @@ abstract final class RetentionCueBuilder {
       case EntryType.meaningfulMoment:
         return 'Moment draft';
       case EntryType.keepsake:
-        return 'Keepsake draft';
+        return 'Photo & media draft';
     }
   }
 }

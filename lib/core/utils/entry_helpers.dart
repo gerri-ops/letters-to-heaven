@@ -10,7 +10,7 @@ String entryTypeLabel(EntryType type) {
     case EntryType.meaningfulMoment:
       return 'Meaningful Moment';
     case EntryType.keepsake:
-      return 'Keepsake';
+      return 'Photo & media';
   }
 }
 

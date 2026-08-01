@@ -3,7 +3,12 @@ import 'package:letters_to_heaven/features/keepsake/keepsake_catalog.dart';
 
 void main() {
   test('keepsake catalog covers book types and three export styles', () {
-    expect(KeepsakeBookType.values, hasLength(8));
+    expect(KeepsakeBookType.values, hasLength(6));
+    expect(
+      KeepsakeBookType.values.contains(KeepsakeBookType.lettersToHeaven),
+      isTrue,
+    );
+    expect(availableBookTypesFor(const []), isEmpty);
     expect(ExportTheme.values, hasLength(3));
     expect(ExportTheme.journalPdf.label, 'Journal PDF');
     expect(ExportTheme.simple.label, 'Simple');

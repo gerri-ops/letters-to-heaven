@@ -3,10 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/state/app_scope.dart';
 import '../../core/theme/app_theme.dart';
-import '../../core/theme/artwork_assets.dart';
-import '../../core/theme/artwork_image.dart';
 import '../../core/theme/letters_app_bar.dart';
-import '../capture/quick_capture_screen.dart';
 
 /// Screen 5 — no streaks / no pressure (major product differentiator).
 class PacePromiseScreen extends StatelessWidget {
@@ -21,21 +18,9 @@ class PacePromiseScreen extends StatelessWidget {
     if (!context.mounted) {
       return;
     }
-    final intent = app.onboardingIntent;
-    switch (intent) {
-      case OnboardingIntent.sentence:
-        context.go('/entry/new?type=letter');
-      case OnboardingIntent.detail:
-        context.go('/entry/new?type=memory');
-      case OnboardingIntent.photo:
-        context.go('/capture?mode=${QuickCaptureMode.photo.name}');
-      case OnboardingIntent.voice:
-        context.go('/voice-keepsakes');
-      case OnboardingIntent.lookAround:
-      case null:
-      default:
-        context.go('/shell/home');
-    }
+    // First action already happened after memorial naming (when chosen).
+    // This gate only unlocks the main app chrome.
+    context.go('/shell/home');
   }
 
   @override
@@ -50,13 +35,6 @@ class PacePromiseScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const ArtworkImage(
-              asset: ArtworkAssets.dogwood,
-              height: 72,
-              fit: BoxFit.contain,
-              opacity: 0.85,
-            ),
-            const SizedBox(height: 20),
             Text(
               'No daily streaks. No missed-day messages. No progress bars or '
               'grief scores. Write once, return often, or step away for months—'

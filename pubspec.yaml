@@ -2,7 +2,7 @@ name: letters_to_heaven
 description: "Letters to Heaven — Grief Journal & Memory Keeper."
 publish_to: 'none'
 
-version: 1.0.0+8
+version: 1.0.0+9
 
 environment:
   sdk: ^3.12.2

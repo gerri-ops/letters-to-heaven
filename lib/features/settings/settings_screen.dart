@@ -57,6 +57,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() => _biometricEnabled = value);
   }
 
+  Future<void> _editScreenName() async {
+    final app = AppScope.of(context);
+    final controller = TextEditingController(text: app.displayName);
+    final next = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Screen name'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          textInputAction: TextInputAction.done,
+          decoration: const InputDecoration(
+            labelText: 'How your name appears',
+            hintText: 'Enter a screen name',
+          ),
+          onSubmitted: (_) => Navigator.pop(ctx, controller.text.trim()),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    if (!mounted || next == null) {
+      return;
+    }
+    final trimmed = next.trim();
+    if (trimmed.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a screen name.')),
+      );
+      return;
+    }
+    await app.setScreenName(trimmed);
+    if (!mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Screen name updated.')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final app = AppScope.of(context);
@@ -67,6 +115,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       body: ListView(
         children: [
+          ListTile(
+            title: const Text('Screen name'),
+            subtitle: Text(
+              app.displayName.trim().isEmpty
+                  ? 'Not set'
+                  : app.displayName.trim(),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: _editScreenName,
+          ),
           ListTile(
             title: const Text('Memorials'),
             subtitle: Text(
@@ -246,19 +304,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             title: const Text('Subscription'),
             onTap: () => context.go('/shell/subscribe'),
-          ),
-          ListTile(
-            title: const Text('Gift Premium'),
-            subtitle: const Text(
-              'One year, \$39.99 — does not renew for the recipient',
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.push('/gift'),
-          ),
-          ListTile(
-            title: const Text('Redeem a gift'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.push('/gift?mode=redeem'),
           ),
           Padding(
             padding: const EdgeInsets.all(16),

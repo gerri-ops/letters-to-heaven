@@ -37,13 +37,6 @@ class WelcomeScreen extends StatelessWidget {
                   const Center(
                     child: CardinalAccent(size: 88),
                   ),
-                  const SizedBox(height: 12),
-                  const ArtworkImage(
-                    asset: ArtworkAssets.dogwood,
-                    height: 132,
-                    width: double.infinity,
-                    fit: BoxFit.contain,
-                  ),
                   const SizedBox(height: 20),
                   Text(
                     'Letters to Heaven',

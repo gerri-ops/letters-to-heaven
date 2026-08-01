@@ -10,6 +10,7 @@ import '../../core/theme/artwork_image.dart';
 import '../../core/theme/letters_app_bar.dart';
 import '../../core/utils/entry_helpers.dart';
 import '../../data/models/models.dart';
+import '../shell/letters_back_or_home_button.dart';
 import 'voice_keepsake_models.dart';
 
 /// Dedicated home for preserving voice — a premium hero surface.
@@ -103,6 +104,8 @@ class _VoiceKeepsakesScreenState extends State<VoiceKeepsakesScreen> {
       appBar: const LettersAppBar(
         title: Text('Voice Keepsakes'),
         intro: voicePremiumHero,
+        leading: LettersBackOrHomeButton(),
+        automaticallyImplyLeading: false,
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _openNew,

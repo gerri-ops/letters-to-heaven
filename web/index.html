@@ -9,10 +9,7 @@
     it to work correctly.
 
     For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
+    * https://docs.flutter.dev/ui/navigation/url-strategies
   -->
   <base href="$FLUTTER_BASE_HREF">
 
@@ -29,10 +26,43 @@
 
   <!-- Cache-busting meta so browsers prefer a fresh bootstrap after deploys. -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta name="build-id" content="1.0.0+7" />
+  <meta name="build-id" content="1.0.0+9" />
 
   <title>Letters to Heaven — Save the little things</title>
   <link rel="manifest" href="manifest.json">
+
+  <!--
+    PDF.js 5.x (used by package:printing on web) may call Map/WeakMap
+    getOrInsertComputed. Chrome/Edge older than 145 throw NoSuchMethodError.
+    Polyfill keeps Keepsake PdfPreview working on current browsers.
+  -->
+  <script>
+    (function () {
+      function installGetOrInsert(proto) {
+        if (typeof proto.getOrInsert !== 'function') {
+          proto.getOrInsert = function (key, defaultValue) {
+            if (this.has(key)) {
+              return this.get(key);
+            }
+            this.set(key, defaultValue);
+            return defaultValue;
+          };
+        }
+        if (typeof proto.getOrInsertComputed !== 'function') {
+          proto.getOrInsertComputed = function (key, callback) {
+            if (this.has(key)) {
+              return this.get(key);
+            }
+            var value = callback(key);
+            this.set(key, value);
+            return value;
+          };
+        }
+      }
+      installGetOrInsert(Map.prototype);
+      installGetOrInsert(WeakMap.prototype);
+    })();
+  </script>
 </head>
 <body>
   <!--

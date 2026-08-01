@@ -20,6 +20,7 @@ import '../../core/theme/letters_app_bar.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/app_repository.dart';
 import '../entries/emotional_exit_door.dart';
+import '../shell/letters_back_or_home_button.dart';
 import 'voice_keepsake_models.dart';
 
 class VoiceKeepsakeEditorScreen extends StatefulWidget {
@@ -400,6 +401,13 @@ class _VoiceKeepsakeEditorScreenState extends State<VoiceKeepsakeEditorScreen> {
   Widget build(BuildContext context) {
     if (_loading) {
       return const Scaffold(
+        appBar: LettersAppBar(
+          title: Text('Voice Keepsakes'),
+          leading: LettersBackOrHomeButton(
+            fallbackLocation: '/voice-keepsakes',
+          ),
+          automaticallyImplyLeading: false,
+        ),
         body: Center(child: CircularProgressIndicator()),
       );
     }
@@ -408,6 +416,10 @@ class _VoiceKeepsakeEditorScreenState extends State<VoiceKeepsakeEditorScreen> {
       appBar: LettersAppBar(
         title: Text(widget.entryId == null ? 'New voice keepsake' : 'Edit voice keepsake'),
         intro: voicePremiumHero,
+        leading: const LettersBackOrHomeButton(
+          fallbackLocation: '/voice-keepsakes',
+        ),
+        automaticallyImplyLeading: false,
         actions: [
           TextButton(
             onPressed: _saving ? null : () => _save(stepAway: true),

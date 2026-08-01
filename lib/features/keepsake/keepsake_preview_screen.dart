@@ -15,6 +15,7 @@ import '../../data/models/models.dart';
 import 'keepsake_book_type_picker.dart';
 import 'keepsake_catalog.dart';
 import 'keepsake_pdf_builder.dart';
+import 'keepsake_template_fallback.dart';
 
 /// Conversion surface: show what saved memories become as a giftable book.
 class KeepsakePreviewScreen extends StatefulWidget {
@@ -27,10 +28,11 @@ class KeepsakePreviewScreen extends StatefulWidget {
 }
 
 class _KeepsakePreviewScreenState extends State<KeepsakePreviewScreen> {
+  List<Entry> _allVisible = [];
   List<Entry> _entries = [];
   Memorial? _memorial;
   bool _loading = true;
-  Set<KeepsakeBookType> _bookTypes = {KeepsakeBookType.lettersToHeaven};
+  Set<KeepsakeBookType> _bookTypes = {};
   late ExportTheme _theme =
       widget.initialTheme ?? ExportTheme.journalPdf;
   Map<String, List<MediaAttachment>> _mediaByEntry = {};
@@ -56,6 +58,8 @@ class _KeepsakePreviewScreenState extends State<KeepsakePreviewScreen> {
         final bd = b.entryDate ?? b.createdAt ?? DateTime(1970);
         return ad.compareTo(bd);
       });
+    final available = availableBookTypesFor(visible).toSet();
+    _bookTypes.removeWhere((type) => !available.contains(type));
     final suggested = suggestedEntriesForBookTypes(_bookTypes, visible);
     final preview = suggested.take(3).toList();
     final mediaByEntry = <String, List<MediaAttachment>>{};
@@ -66,6 +70,7 @@ class _KeepsakePreviewScreenState extends State<KeepsakePreviewScreen> {
     if (!mounted) return;
     setState(() {
       _memorial = memorial;
+      _allVisible = visible;
       _entries = preview;
       _mediaByEntry = mediaByEntry;
       _usingTemplatePreview = visible.isEmpty;
@@ -108,6 +113,44 @@ class _KeepsakePreviewScreenState extends State<KeepsakePreviewScreen> {
     if (ok || app.premium) {
       context.push('/export?theme=${_theme.name}');
     }
+  }
+
+  Future<void> _requirePremium() async {
+    if (!mounted) {
+      return;
+    }
+    context.push(
+      '/paywall?trigger=${PaywallTrigger.keepsakePreview.queryValue}',
+    );
+  }
+
+  List<Widget> _previewActions() {
+    return [
+      PdfPreviewAction(
+        icon: const Icon(Icons.print_outlined),
+        onPressed: (context, build, format) async {
+          if (!AppScope.of(context).premium) {
+            await _requirePremium();
+            return;
+          }
+          await Printing.layoutPdf(onLayout: build, name: 'keepsake_preview.pdf');
+        },
+      ),
+      PdfPreviewAction(
+        icon: const Icon(Icons.share_outlined),
+        onPressed: (context, build, format) async {
+          if (!AppScope.of(context).premium) {
+            await _requirePremium();
+            return;
+          }
+          final bytes = await build(format);
+          await Printing.sharePdf(
+            bytes: bytes,
+            filename: 'keepsake_preview.pdf',
+          );
+        },
+      ),
+    ];
   }
 
   @override
@@ -162,6 +205,7 @@ class _KeepsakePreviewScreenState extends State<KeepsakePreviewScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: KeepsakeBookTypePicker(
                         selected: _bookTypes,
+                        entries: _allVisible,
                         onChanged: (value) async {
                           setState(() {
                             _bookTypes = value;
@@ -189,13 +233,31 @@ class _KeepsakePreviewScreenState extends State<KeepsakePreviewScreen> {
                     ),
                     Expanded(
                       child: PdfPreview(
+                        key: ValueKey(
+                          'preview-${_theme.name}-${bookFocusSlug(_bookTypes)}',
+                        ),
                         build: _buildPdf,
-                        allowPrinting: app.premium,
-                        allowSharing: app.premium,
+                        allowPrinting: false,
+                        allowSharing: false,
                         canChangePageFormat: false,
                         canChangeOrientation: false,
                         canDebug: false,
                         pdfFileName: 'keepsake_preview.pdf',
+                        actions: _previewActions(),
+                        onError: (context, error) {
+                          final memorial = _memorial;
+                          if (memorial == null) {
+                            return Center(
+                              child: Text('Could not preview keepsake: $error'),
+                            );
+                          }
+                          return KeepsakeTemplateFallback(
+                            memorial: memorial,
+                            theme: _theme,
+                            bookType: primaryBookType(_bookTypes),
+                            error: error,
+                          );
+                        },
                       ),
                     ),
                     SafeArea(
@@ -235,7 +297,7 @@ class _KeepsakePreviewScreenState extends State<KeepsakePreviewScreen> {
                                 child: const Text('See Premium details'),
                               ),
                               TextButton(
-                                onPressed: () => context.push('/data-rights'),
+                                onPressed: () => context.go('/shell/home'),
                                 child: const Text(
                                   TrustPaywallCopy.continueBasicLabel,
                                 ),

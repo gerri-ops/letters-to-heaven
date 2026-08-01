@@ -33,6 +33,28 @@ class FirestoreClient {
     );
   }
 
+  Future<Map<String, dynamic>?> getDocument({
+    required String collectionPath,
+    required String documentId,
+  }) async {
+    final token = await AuthService.instance.getValidIdToken();
+    final uri = Uri.parse('$_base/$collectionPath/$documentId');
+    final response = await _client.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode == 404) {
+      return null;
+    }
+    if (response.statusCode >= 400) {
+      throw StateError(
+        'Firestore get failed (${response.statusCode}): ${response.body}',
+      );
+    }
+    final json = jsonDecode(response.body) as Map<String, dynamic>;
+    return decodeDocument(json);
+  }
+
   Future<void> upsertDocument({
     required String collectionPath,
     required String documentId,

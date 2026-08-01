@@ -6,6 +6,7 @@ import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 
 import '../../core/analytics/analytics.dart';
+import '../../core/billing/trust_paywall_copy.dart';
 import '../../core/reviews/review_request_copy.dart';
 import '../../core/reviews/review_request_service.dart';
 import '../../core/state/app_scope.dart';
@@ -16,6 +17,7 @@ import '../../data/models/models.dart';
 import 'keepsake_book_type_picker.dart';
 import 'keepsake_catalog.dart';
 import 'keepsake_pdf_builder.dart';
+import 'keepsake_template_fallback.dart';
 
 /// Premium Keepsake Builder — select entries and produce a giftable book.
 class ExportScreen extends StatefulWidget {
@@ -34,7 +36,7 @@ class _ExportScreenState extends State<ExportScreen> {
   final Set<String> _selected = {};
   late ExportTheme _theme =
       widget.initialTheme ?? ExportTheme.journalPdf;
-  Set<KeepsakeBookType> _bookTypes = {KeepsakeBookType.lettersToHeaven};
+  Set<KeepsakeBookType> _bookTypes = {};
   bool _loading = true;
   bool _exporting = false;
   Map<String, List<MediaAttachment>> _previewMedia = {};
@@ -46,14 +48,6 @@ class _ExportScreenState extends State<ExportScreen> {
   }
 
   Future<void> _bootstrap() async {
-    final app = AppScope.of(context);
-    if (!app.premium) {
-      if (mounted) {
-        final theme = _theme.name;
-        context.go('/keepsake-preview?theme=$theme');
-      }
-      return;
-    }
     await _load();
   }
 
@@ -110,12 +104,18 @@ class _ExportScreenState extends State<ExportScreen> {
       return chosen;
     }
     if (_all.isEmpty) {
-      return KeepsakePreviewSamples.templateEntries(_memorial!);
+      final memorial = _memorial;
+      if (memorial == null) {
+        return const [];
+      }
+      return KeepsakePreviewSamples.templateEntries(memorial);
     }
     return suggestedEntriesForBookTypes(_bookTypes, _all).take(3).toList();
   }
 
   void _applyBookTypes({bool notify = true}) {
+    final available = availableBookTypesFor(_all).toSet();
+    _bookTypes.removeWhere((type) => !available.contains(type));
     final suggested = suggestedEntriesForBookTypes(_bookTypes, _all);
     _entries = suggested;
     _selected
@@ -132,9 +132,10 @@ class _ExportScreenState extends State<ExportScreen> {
       return Uint8List(0);
     }
     final previewEntries = _previewEntriesForPdf();
+    final templateOnly = _all.isEmpty && previewEntries.isEmpty;
     final doc = await KeepsakePdfBuilder(
       memorial: memorial,
-      entries: _all.isEmpty ? [] : previewEntries,
+      entries: templateOnly ? const [] : previewEntries,
       theme: _theme,
       bookType: primaryBookType(_bookTypes),
       mediaByEntryId: _previewMedia,
@@ -152,6 +153,10 @@ class _ExportScreenState extends State<ExportScreen> {
     }
     final memorial = _memorial;
     if (memorial == null) {
+      return;
+    }
+    if (!AppScope.of(context).premium) {
+      await _requirePremiumForExport();
       return;
     }
     setState(() => _exporting = true);
@@ -175,10 +180,7 @@ class _ExportScreenState extends State<ExportScreen> {
           .replaceAll(RegExp(r'[^\w\s-]'), '')
           .trim()
           .replaceAll(RegExp(r'\s+'), '_');
-      final bookSlug = primaryBookType(_bookTypes)
-          .shortLabel
-          .toLowerCase()
-          .replaceAll(RegExp(r'[^\w]+'), '_');
+      final bookSlug = bookFocusSlug(_bookTypes);
       final filename = safeName.isEmpty
           ? 'letters_to_heaven_$bookSlug.pdf'
           : '${bookSlug}_$safeName.pdf';
@@ -203,6 +205,42 @@ class _ExportScreenState extends State<ExportScreen> {
     }
   }
 
+  Future<void> _requirePremiumForExport() async {
+    if (!mounted) {
+      return;
+    }
+    context.push(
+      '/paywall?trigger=${PaywallTrigger.keepsakePreview.queryValue}'
+      '&next=${Uri.encodeComponent('/export?theme=${_theme.name}')}',
+    );
+  }
+
+  List<Widget> _previewActions() {
+    return [
+      PdfPreviewAction(
+        icon: const Icon(Icons.print_outlined),
+        onPressed: (context, build, format) async {
+          if (!AppScope.of(context).premium) {
+            await _requirePremiumForExport();
+            return;
+          }
+          await Printing.layoutPdf(onLayout: build, name: 'keepsake.pdf');
+        },
+      ),
+      PdfPreviewAction(
+        icon: const Icon(Icons.share_outlined),
+        onPressed: (context, build, format) async {
+          if (!AppScope.of(context).premium) {
+            await _requirePremiumForExport();
+            return;
+          }
+          final bytes = await build(format);
+          await Printing.sharePdf(bytes: bytes, filename: 'keepsake.pdf');
+        },
+      ),
+    ];
+  }
+
   void _selectAll(bool all) {
     setState(() {
       _selected.clear();
@@ -217,20 +255,13 @@ class _ExportScreenState extends State<ExportScreen> {
   Widget build(BuildContext context) {
     final memorial = _memorial;
     final showingTemplate = _all.isEmpty;
+    final premium = AppScope.of(context).premium;
 
     return Scaffold(
       appBar: LettersAppBar(
         title: const Text('Keepsake Builder'),
         intro:
             'Pick Journal PDF, Simple, or Ink Saver—then choose what to include.',
-        actions: [
-          IconButton(
-            tooltip: 'Preview',
-            onPressed: () =>
-                context.push('/keepsake-preview?theme=${_theme.name}'),
-            icon: const Icon(Icons.visibility_outlined),
-          ),
-        ],
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -283,7 +314,7 @@ class _ExportScreenState extends State<ExportScreen> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
                       child: Text(
-                        'Book focus (choose one or more)',
+                        'Book focus',
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                     ),
@@ -291,6 +322,7 @@ class _ExportScreenState extends State<ExportScreen> {
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                       child: KeepsakeBookTypePicker(
                         selected: _bookTypes,
+                        entries: _all,
                         onChanged: (value) async {
                           setState(() => _bookTypes = value);
                           _applyBookTypes(notify: true);
@@ -338,71 +370,100 @@ class _ExportScreenState extends State<ExportScreen> {
                       ),
                       const Divider(height: 1),
                     ],
-                    Expanded(
-                      child: showingTemplate
-                          ? PdfPreview(
-                              build: _buildPdf,
-                              allowPrinting: true,
-                              allowSharing: true,
-                              canChangePageFormat: false,
-                              canChangeOrientation: false,
-                              canDebug: false,
-                              pdfFileName: 'keepsake_template.pdf',
-                            )
-                          : _entries.isEmpty
-                              ? Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(24),
-                                    child: Text(
-                                      'No entries match this book focus yet. '
-                                      'Try another focus or save more memories.',
-                                      textAlign: TextAlign.center,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium
-                                          ?.copyWith(color: AppColors.mutedInk),
-                                    ),
+                    if (!showingTemplate)
+                      SizedBox(
+                        height: 160,
+                        child: _entries.isEmpty
+                            ? Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(24),
+                                  child: Text(
+                                    'No entries match this book focus yet. '
+                                    'Try another focus or save more memories.',
+                                    textAlign: TextAlign.center,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(color: AppColors.mutedInk),
                                   ),
-                                )
-                              : ListView.builder(
-                                  itemCount: _entries.length,
-                                  itemBuilder: (context, index) {
-                                    final e = _entries[index];
-                                    final date = e.entryDate ?? e.createdAt;
-                                    return CheckboxListTile(
-                                      value: _selected.contains(e.id),
-                                      onChanged: (v) {
-                                        setState(() {
-                                          if (v == true) {
-                                            _selected.add(e.id);
-                                          } else {
-                                            _selected.remove(e.id);
-                                          }
-                                        });
-                                        _refreshPreviewMedia();
-                                      },
-                                      title: Text(
-                                        e.title.isEmpty
-                                            ? entryTypeLabel(e.type)
-                                            : e.title,
-                                      ),
-                                      subtitle: Text(
-                                        [
-                                          entryTypeLabel(e.type),
-                                          if (date != null)
-                                            MaterialLocalizations.of(context)
-                                                .formatMediumDate(date),
-                                        ].join(' · '),
-                                      ),
-                                    );
-                                  },
                                 ),
+                              )
+                            : ListView.builder(
+                                itemCount: _entries.length,
+                                itemBuilder: (context, index) {
+                                  final e = _entries[index];
+                                  final date = e.entryDate ?? e.createdAt;
+                                  return CheckboxListTile(
+                                    dense: true,
+                                    value: _selected.contains(e.id),
+                                    onChanged: (v) {
+                                      setState(() {
+                                        if (v == true) {
+                                          _selected.add(e.id);
+                                        } else {
+                                          _selected.remove(e.id);
+                                        }
+                                      });
+                                      _refreshPreviewMedia();
+                                    },
+                                    title: Text(
+                                      e.title.isEmpty
+                                          ? entryTypeLabel(e.type)
+                                          : e.title,
+                                    ),
+                                    subtitle: Text(
+                                      [
+                                        entryTypeLabel(e.type),
+                                        if (date != null)
+                                          MaterialLocalizations.of(context)
+                                              .formatMediumDate(date),
+                                      ].join(' · '),
+                                    ),
+                                  );
+                                },
+                              ),
+                      ),
+                    Expanded(
+                      child: PdfPreview(
+                        key: ValueKey(
+                          'builder-${_theme.name}-'
+                          '${bookFocusSlug(_bookTypes)}-'
+                          '${_selected.length}-$premium',
+                        ),
+                        build: _buildPdf,
+                        // Built-in buttons bypass our paywall; use custom actions.
+                        allowPrinting: false,
+                        allowSharing: false,
+                        canChangePageFormat: false,
+                        canChangeOrientation: false,
+                        canDebug: false,
+                        pdfFileName: 'keepsake.pdf',
+                        actions: _previewActions(),
+                        onError: (context, error) {
+                          final memorial = _memorial;
+                          if (memorial == null) {
+                            return Center(
+                              child: Text(
+                                'Could not preview keepsake: $error',
+                              ),
+                            );
+                          }
+                          return KeepsakeTemplateFallback(
+                            memorial: memorial,
+                            theme: _theme,
+                            bookType: primaryBookType(_bookTypes),
+                            error: error,
+                          );
+                        },
+                      ),
                     ),
                     SafeArea(
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: FilledButton(
-                          onPressed: _exporting || showingTemplate ? null : _export,
+                          onPressed: _exporting || showingTemplate
+                              ? null
+                              : _export,
                           child: _exporting
                               ? const SizedBox(
                                   height: 20,
@@ -413,7 +474,9 @@ class _ExportScreenState extends State<ExportScreen> {
                               : Text(
                                   showingTemplate
                                       ? 'Save entries to export'
-                                      : 'Create ${_theme.label}',
+                                      : premium
+                                          ? 'Create ${_theme.label}'
+                                          : 'Unlock ${_theme.label}',
                                 ),
                         ),
                       ),

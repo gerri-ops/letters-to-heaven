@@ -254,7 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         context.push('/entry/new?type=meaningfulMoment'),
                   ),
                   _PrimaryAction(
-                    title: 'Keepsake',
+                    title: 'Photo & media',
                     subtitle: entryTypeBlurb(EntryType.keepsake),
                     icon: Icons.photo_camera_outlined,
                     onTap: () => context.push('/entry/new?type=keepsake'),

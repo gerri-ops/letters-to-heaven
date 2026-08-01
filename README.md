@@ -44,7 +44,7 @@ Copy `.env.example` for local notes — never commit production secrets.
 | Client | Flutter (iOS, Android; web scaffolded) |
 | Local | SQLite (`sqflite`); production should use SQLCipher |
 | Cloud | Firebase Auth, Firestore, Storage, Functions (stubs in `firebase/`) |
-| Billing | Basic (useful free writing) + Premium $4.99/mo or $39.99/yr; non-renewing gift year $39.99; 14-day trial; store IAP later |
+| Billing | Basic + Premium $4.99/mo or $39.99/yr via **Stripe Checkout**; non-renewing gift year $39.99; 14-day local trial + Stripe trial; store IAP later |
 
 ## App structure
 
@@ -76,6 +76,7 @@ Navigation: **Home · Journal · Memories · Signs · Keepsake** (+ Settings).
 - [Deferred / delayed](docs/DEFERRED_SCOPE.md)
 - [Privacy trust](docs/PRIVACY_TRUST.md)
 - [AI stance](docs/AI_STANCE.md)
+- [Stripe subscriptions](docs/STRIPE_SETUP.md)
 - [Beta & store runbook](docs/BETA_STORE_RUNBOOK.md)
 
 ## License

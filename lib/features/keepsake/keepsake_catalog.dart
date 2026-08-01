@@ -1,15 +1,13 @@
 import '../../data/models/models.dart';
 
-/// Premium Keepsake Builder book formats — the product’s commercial moat.
+/// Premium Keepsake Builder book focus categories.
 enum KeepsakeBookType {
   lettersToHeaven,
   favoriteMemories,
   familyRecipe,
   storiesAndTraditions,
   signsAndDreams,
-  remembranceBooklet,
   memorialInterview,
-  onePageRemembrance,
 }
 
 extension KeepsakeBookTypeX on KeepsakeBookType {
@@ -25,33 +23,25 @@ extension KeepsakeBookTypeX on KeepsakeBookType {
         return 'Stories and Traditions book';
       case KeepsakeBookType.signsAndDreams:
         return 'Signs and Dreams journal';
-      case KeepsakeBookType.remembranceBooklet:
-        return 'Birthday or anniversary remembrance booklet';
       case KeepsakeBookType.memorialInterview:
         return 'Memorial interview collection';
-      case KeepsakeBookType.onePageRemembrance:
-        return 'One-page remembrance print';
     }
   }
 
   String get shortLabel {
     switch (this) {
       case KeepsakeBookType.lettersToHeaven:
-        return 'Letters book';
+        return 'Letters';
       case KeepsakeBookType.favoriteMemories:
-        return 'Favorite memories';
+        return 'Memories';
       case KeepsakeBookType.familyRecipe:
-        return 'Recipe book';
+        return 'Recipes';
       case KeepsakeBookType.storiesAndTraditions:
         return 'Stories & traditions';
       case KeepsakeBookType.signsAndDreams:
         return 'Signs & dreams';
-      case KeepsakeBookType.remembranceBooklet:
-        return 'Remembrance booklet';
       case KeepsakeBookType.memorialInterview:
-        return 'Interview collection';
-      case KeepsakeBookType.onePageRemembrance:
-        return 'One-page print';
+        return 'Interviews';
     }
   }
 
@@ -67,12 +57,8 @@ extension KeepsakeBookTypeX on KeepsakeBookType {
         return 'Family ways, holidays, and the rituals that shaped you.';
       case KeepsakeBookType.signsAndDreams:
         return 'Cardinals, dreams, songs, and moments that felt meaningful.';
-      case KeepsakeBookType.remembranceBooklet:
-        return 'A gentle booklet for birthdays, anniversaries, and hard days.';
       case KeepsakeBookType.memorialInterview:
         return 'Questions answered, stories collected, voice preserved in print.';
-      case KeepsakeBookType.onePageRemembrance:
-        return 'A single printable page for a frame, service, or quiet shelf.';
     }
   }
 
@@ -95,8 +81,7 @@ extension KeepsakeBookTypeX on KeepsakeBookType {
             title.contains('recipe') ||
             body.contains('ingredient');
       case KeepsakeBookType.storiesAndTraditions:
-        return entry.type == EntryType.memory ||
-            tags.any((t) =>
+        return tags.any((t) =>
                 t.contains('tradition') ||
                 t.contains('holiday') ||
                 t.contains('family')) ||
@@ -107,23 +92,21 @@ extension KeepsakeBookTypeX on KeepsakeBookType {
                 t.contains('sign') ||
                 t.contains('dream') ||
                 t.contains('cardinal'));
-      case KeepsakeBookType.remembranceBooklet:
-        return true;
       case KeepsakeBookType.memorialInterview:
         return template.contains('interview') ||
             tags.any((t) => t.contains('interview') || t.contains('question'));
-      case KeepsakeBookType.onePageRemembrance:
-        return entry.isFavorite || true;
     }
   }
 
-  List<Entry> suggestedEntries(List<Entry> all) {
-    final matched = all.where(matchesEntry).toList();
-    if (matched.isNotEmpty) {
-      return matched;
-    }
-    return all;
-  }
+  List<Entry> suggestedEntries(List<Entry> all) =>
+      all.where(matchesEntry).toList();
+}
+
+/// Categories that currently have matching saved content.
+List<KeepsakeBookType> availableBookTypesFor(List<Entry> entries) {
+  return KeepsakeBookType.values
+      .where((type) => entries.any(type.matchesEntry))
+      .toList();
 }
 
 /// Giftable export styles — the three keepsake creations that make the product unique.
@@ -248,6 +231,7 @@ abstract final class KeepsakePreviewSamples {
   }
 }
 
+/// Empty set means "All" focus — include every visible entry.
 KeepsakeBookType primaryBookType(Set<KeepsakeBookType> types) {
   if (types.isEmpty) {
     return KeepsakeBookType.lettersToHeaven;
@@ -255,12 +239,22 @@ KeepsakeBookType primaryBookType(Set<KeepsakeBookType> types) {
   return types.first;
 }
 
+String bookFocusSlug(Set<KeepsakeBookType> types) {
+  if (types.isEmpty) {
+    return 'all';
+  }
+  return primaryBookType(types)
+      .shortLabel
+      .toLowerCase()
+      .replaceAll(RegExp(r'[^\w]+'), '_');
+}
+
 List<Entry> suggestedEntriesForBookTypes(
   Set<KeepsakeBookType> types,
   List<Entry> all,
 ) {
   if (types.isEmpty) {
-    return KeepsakeBookType.lettersToHeaven.suggestedEntries(all);
+    return List<Entry>.from(all);
   }
   final seen = <String>{};
   final merged = <Entry>[];
