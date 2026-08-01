@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/state/app_scope.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/letters_app_bar.dart';
 import 'keepsake_catalog.dart';
@@ -8,17 +9,24 @@ import 'keepsake_catalog.dart';
 class KeepsakeScreen extends StatelessWidget {
   const KeepsakeScreen({super.key});
 
-  void _openExport(BuildContext context, ExportTheme theme) {
+  void _openBook(BuildContext context, ExportTheme theme) {
+    final premium = AppScope.of(context).premium;
     final themeParam = Uri.encodeComponent(theme.name);
-    context.push('/export?theme=$themeParam');
+    context.push(
+      premium
+          ? '/export?theme=$themeParam'
+          : '/keepsake-preview?theme=$themeParam',
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final premium = AppScope.of(context).premium;
     return Scaffold(
       appBar: const LettersAppBar(
         title: Text('Keepsake'),
+        showDogwood: false,
         intro:
             'Create a printable keepsake from what you have already saved—this is what makes the app unique.',
       ),
@@ -38,6 +46,13 @@ class KeepsakeScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
+          FilledButton(
+            onPressed: () => _openBook(context, ExportTheme.journalPdf),
+            child: Text(
+              premium ? 'Open Keepsake Builder' : 'Preview a keepsake',
+            ),
+          ),
+          const SizedBox(height: 16),
           Text(
             'Book formats',
             style: theme.textTheme.titleSmall,
@@ -47,14 +62,10 @@ class KeepsakeScreen extends StatelessWidget {
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(style.label),
+              subtitle: Text(style.blurb),
               trailing: const Icon(Icons.chevron_right),
-              onTap: () => _openExport(context, style),
+              onTap: () => _openBook(context, style),
             ),
-          const SizedBox(height: 8),
-          FilledButton(
-            onPressed: () => _openExport(context, ExportTheme.journalPdf),
-            child: const Text('Open Keepsake Builder'),
-          ),
           const SizedBox(height: 22),
           Text(
             'Also here',

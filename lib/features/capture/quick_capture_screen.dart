@@ -474,6 +474,7 @@ class _QuickCaptureScreenState extends State<QuickCaptureScreen> {
     return Scaffold(
       appBar: LettersAppBar(
         title: const Text('Remember something?'),
+        showDogwood: false,
         intro: 'No title needed. Capture it, then keep going.',
         actions: [
           TextButton(

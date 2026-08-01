@@ -146,7 +146,8 @@ class _TrustPaywallScreenState extends State<TrustPaywallScreen> {
         ),
       );
       if (go == true && mounted) {
-        context.push('/account?next=home&reason=backup');
+        final returnTo = Uri.encodeComponent('/shell/subscribe');
+        context.push('/account?next=$returnTo&reason=backup');
       }
       return;
     }
@@ -221,6 +222,7 @@ class _TrustPaywallScreenState extends State<TrustPaywallScreen> {
     return Scaffold(
       appBar: LettersAppBar(
         title: const Text('Premium'),
+        showDogwood: false,
         intro: TrustPaywallCopy.trustStatement,
         automaticallyImplyLeading: !widget.embeddedInShell,
       ),
@@ -296,9 +298,18 @@ class _TrustPaywallScreenState extends State<TrustPaywallScreen> {
           ],
           const SizedBox(height: 24),
           if (app.onStripePremium) ...[
-            const FilledButton(
-              onPressed: null,
-              child: Text('Premium active'),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: AppColors.parchment,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                'Premium active',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleMedium,
+              ),
             ),
             const SizedBox(height: 10),
             OutlinedButton(

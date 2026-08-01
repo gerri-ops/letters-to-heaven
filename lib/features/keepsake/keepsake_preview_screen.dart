@@ -124,10 +124,10 @@ class _KeepsakePreviewScreenState extends State<KeepsakePreviewScreen> {
     );
   }
 
-  List<Widget> _previewActions() {
+  List<Widget> _previewActions(bool premium) {
     return [
       PdfPreviewAction(
-        icon: const Icon(Icons.print_outlined),
+        icon: Icon(premium ? Icons.print_outlined : Icons.lock_outline),
         onPressed: (context, build, format) async {
           if (!AppScope.of(context).premium) {
             await _requirePremium();
@@ -137,7 +137,7 @@ class _KeepsakePreviewScreenState extends State<KeepsakePreviewScreen> {
         },
       ),
       PdfPreviewAction(
-        icon: const Icon(Icons.share_outlined),
+        icon: Icon(premium ? Icons.share_outlined : Icons.lock_outline),
         onPressed: (context, build, format) async {
           if (!AppScope.of(context).premium) {
             await _requirePremium();
@@ -161,6 +161,7 @@ class _KeepsakePreviewScreenState extends State<KeepsakePreviewScreen> {
     return Scaffold(
       appBar: const LettersAppBar(
         title: Text('Keepsake preview'),
+        showDogwood: false,
         intro: KeepsakePreviewCopy.supporting,
       ),
       body: _loading
@@ -243,7 +244,7 @@ class _KeepsakePreviewScreenState extends State<KeepsakePreviewScreen> {
                         canChangeOrientation: false,
                         canDebug: false,
                         pdfFileName: 'keepsake_preview.pdf',
-                        actions: _previewActions(),
+                        actions: _previewActions(app.premium),
                         onError: (context, error) {
                           final memorial = _memorial;
                           if (memorial == null) {

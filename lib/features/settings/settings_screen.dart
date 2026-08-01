@@ -111,6 +111,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       appBar: const LettersAppBar(
         title: Text('Settings'),
+        showDogwood: false,
         intro: 'Adjust memorial details, privacy, and day-to-day preferences.',
       ),
       body: ListView(

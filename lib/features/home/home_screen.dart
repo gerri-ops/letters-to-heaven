@@ -227,8 +227,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Catch something before it fades. Voice and a quick note sit ready—'
-                    'the rest is optional.',
+                    'Catch something before it fades. Start with a letter, a memory, '
+                    'or a voice note—the rest is optional.',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AppColors.mutedOlive,
                         ),
@@ -245,6 +245,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     subtitle: entryTypeBlurb(EntryType.memory),
                     icon: Icons.auto_stories_outlined,
                     onTap: () => context.push('/entry/new?type=memory'),
+                  ),
+                  _PrimaryAction(
+                    title: 'Voice Keepsake',
+                    subtitle: 'A laugh, a song, a saying—kept with its story.',
+                    icon: Icons.mic_none,
+                    onTap: () => context.push('/voice-keepsakes'),
                   ),
                   _PrimaryAction(
                     title: 'Meaningful Moment',

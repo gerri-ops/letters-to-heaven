@@ -551,6 +551,7 @@ class _EntryEditorScreenState extends State<EntryEditorScreen> {
     return Scaffold(
       appBar: LettersAppBar(
         title: Text(isNew ? template.newTitle : template.editTitle),
+        showDogwood: false,
         intro: 'Write at your own pace. Nothing has to be perfect.',
         actions: [
           IconButton(

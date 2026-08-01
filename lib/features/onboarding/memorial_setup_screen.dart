@@ -84,12 +84,40 @@ class _MemorialSetupScreenState extends State<MemorialSetupScreen> {
   Future<void> _continue() async {
     final app = AppScope.of(context);
     await app.ensureLocalSession();
+    if (!mounted) {
+      return;
+    }
     final uid = app.uid;
     if (uid == null) {
       return;
     }
     final name = _nameController.text.trim();
-    final displayName = name.isEmpty ? 'Someone I miss' : name;
+    var displayName = name;
+    if (displayName.isEmpty) {
+      final useDefault = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Continue without a name?'),
+          content: const Text(
+            'We can use “Someone I miss” for now. You can change it later.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Go back'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Continue'),
+            ),
+          ],
+        ),
+      );
+      if (useDefault != true || !mounted) {
+        return;
+      }
+      displayName = 'Someone I miss';
+    }
     setState(() => _saving = true);
     try {
       const uuid = Uuid();

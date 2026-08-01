@@ -65,6 +65,16 @@ class _AccountScreenState extends State<AccountScreen>
 
   Future<void> _finishAfterAuth() async {
     final app = AppScope.of(context);
+    final next = Uri.decodeComponent(_next);
+    if (next.isNotEmpty && next.startsWith('/')) {
+      if (!app.onboardingComplete && app.currentMemorial != null) {
+        await app.completeOnboarding();
+      }
+      if (mounted) {
+        context.go(next);
+      }
+      return;
+    }
     if (_next == 'home' || app.currentMemorial != null) {
       if (!app.onboardingComplete) {
         await app.completeOnboarding();

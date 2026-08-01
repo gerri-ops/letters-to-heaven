@@ -49,6 +49,11 @@ class PacePromiseScreen extends StatelessWidget {
               onPressed: () => _continue(context),
               child: const Text('Continue'),
             ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: () => context.pop(),
+              child: const Text('Back'),
+            ),
           ],
         ),
       ),

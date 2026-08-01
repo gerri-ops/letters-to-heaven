@@ -123,6 +123,7 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
     if (entry == null) {
       return const Scaffold(
         appBar: LettersAppBar(
+          showDogwood: false,
           intro: 'This entry could not be found.',
         ),
         body: Center(child: Text('Entry not found')),
@@ -137,6 +138,7 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
         title: Text(
           entry.title.isEmpty ? entryTypeLabel(entry.type) : entry.title,
         ),
+        showDogwood: false,
         intro: 'A moment you have saved.',
         actions: [
           IconButton(

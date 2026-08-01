@@ -215,10 +215,10 @@ class _ExportScreenState extends State<ExportScreen> {
     );
   }
 
-  List<Widget> _previewActions() {
+  List<Widget> _previewActions(bool premium) {
     return [
       PdfPreviewAction(
-        icon: const Icon(Icons.print_outlined),
+        icon: Icon(premium ? Icons.print_outlined : Icons.lock_outline),
         onPressed: (context, build, format) async {
           if (!AppScope.of(context).premium) {
             await _requirePremiumForExport();
@@ -228,7 +228,7 @@ class _ExportScreenState extends State<ExportScreen> {
         },
       ),
       PdfPreviewAction(
-        icon: const Icon(Icons.share_outlined),
+        icon: Icon(premium ? Icons.share_outlined : Icons.lock_outline),
         onPressed: (context, build, format) async {
           if (!AppScope.of(context).premium) {
             await _requirePremiumForExport();
@@ -258,8 +258,9 @@ class _ExportScreenState extends State<ExportScreen> {
     final premium = AppScope.of(context).premium;
 
     return Scaffold(
-      appBar: LettersAppBar(
-        title: const Text('Keepsake Builder'),
+      appBar: const LettersAppBar(
+        title: Text('Keepsake Builder'),
+        showDogwood: false,
         intro:
             'Pick Journal PDF, Simple, or Ink Saver—then choose what to include.',
       ),
@@ -438,7 +439,7 @@ class _ExportScreenState extends State<ExportScreen> {
                         canChangeOrientation: false,
                         canDebug: false,
                         pdfFileName: 'keepsake.pdf',
-                        actions: _previewActions(),
+                        actions: _previewActions(premium),
                         onError: (context, error) {
                           final memorial = _memorial;
                           if (memorial == null) {

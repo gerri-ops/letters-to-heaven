@@ -5,8 +5,6 @@ import '../../core/billing/premium_upgrade_sheet.dart';
 import '../../core/billing/trust_paywall_copy.dart';
 import '../../core/state/app_scope.dart';
 import '../../core/theme/app_theme.dart';
-import '../../core/theme/artwork_assets.dart';
-import '../../core/theme/artwork_image.dart';
 import '../../core/theme/letters_app_bar.dart';
 import '../../core/utils/entry_helpers.dart';
 import '../../data/models/models.dart';
@@ -106,11 +104,12 @@ class _VoiceKeepsakesScreenState extends State<VoiceKeepsakesScreen> {
         intro: voicePremiumHero,
         leading: LettersBackOrHomeButton(),
         automaticallyImplyLeading: false,
+        showDogwood: false,
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _openNew,
         icon: const Icon(Icons.mic_none),
-        label: Text(app.premium ? 'Add voice' : 'Premium'),
+        label: Text(app.premium ? 'Add voice' : 'Unlock voice'),
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -163,7 +162,9 @@ class _VoiceKeepsakesScreenState extends State<VoiceKeepsakesScreen> {
                               body: '',
                               trigger: PaywallTrigger.voiceRecording,
                             ),
-                            child: const Text('Start 14-Day Free Trial'),
+                            child: const Text(
+                              TrustPaywallCopy.startTrialLabel,
+                            ),
                           ),
                         ],
                       ],
@@ -171,12 +172,6 @@ class _VoiceKeepsakesScreenState extends State<VoiceKeepsakesScreen> {
                   ),
                   const SizedBox(height: 20),
                   if (_entries.isEmpty) ...[
-                    const ArtworkImage(
-                      asset: ArtworkAssets.dogwood,
-                      height: 100,
-                      opacity: 0.85,
-                    ),
-                    const SizedBox(height: 12),
                     Text(
                       app.premium
                           ? 'No voice keepsakes yet. Add a recording when you are ready.'
